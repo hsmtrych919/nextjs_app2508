@@ -1,0 +1,47 @@
+@charset "utf-8";
+
+@use "../global" as g;
+
+.pt-0 {
+  padding-top: 0 !important;
+}
+
+.pb-0 {
+  padding-bottom: 0 !important;
+}
+
+.px-0 {
+  padding-right: 0 !important;
+  padding-left: 0 !important;
+}
+
+.py-0 {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+// .pt__1 {
+//   padding-top: 8rem;
+// }
+
+// .pb__1 {
+//   padding-bottom: 8rem;
+// }
+
+// @for $value from 2 through 20 {
+// .pt__#{$value} {
+//   padding-top: calc(var(--space) * ($value - 1));
+
+//   @media #{g.$md} {
+//     padding-top: calc(var(--space) * $value);
+//   }
+// }
+// .pb__#{$value} {
+//   padding-bottom: calc(var(--space) * ($value - 1));
+
+//   @media #{g.$md} {
+//     padding-bottom: calc(var(--space) * $value);
+//   }
+// }
+// }
+

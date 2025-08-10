@@ -1,0 +1,192 @@
+@charset "utf-8";
+@use "sass:map";
+@use "sass:math";
+@use "../global/global" as g;
+
+// -----------------------------------------------------------------
+// mixin
+// -----------------------------------------------------------------
+
+@function breakpoint-infix-direct($name, $breakpoints: g.$grid-breakpoints) {
+  @return "#{$name}";
+}
+
+@function breakpoint-infix-before($name, $breakpoints: g.$grid-breakpoints) {
+  @return "#{$name}-";
+}
+
+// @mixin make-container($gutters: g.$grid-gutter-widths) {
+@mixin make-container() {
+  position: relative;
+  margin-right: auto;
+  margin-left: auto;
+  // padding-right: ($grid-gutter-width-base / 2);
+  // padding-left:  ($grid-gutter-width-base / 2);
+}
+
+@mixin make-container-max-widths(
+  $max-widths: g.$container-max-widths,
+  $breakpoints: g.$grid-breakpoints
+) {
+
+  @each $breakpoint, $container-max-width in $max-widths {
+
+    @if $breakpoint == sm {
+
+      @include g.media-breakpoint-up($breakpoint, $breakpoints) {
+        width: 100%;
+      }
+    }
+
+    @else {
+
+      @include g.media-breakpoint-up($breakpoint, $breakpoints) {
+        width: $container-max-width;
+        max-width: 100%;
+      }
+    }
+  }
+}
+
+
+@mixin make-col($size, $columns: g.$grid-columns) {
+  // max-width: percentage($size / $columns);
+  // width: percentage($size / $columns);
+  width: percentage(math.div($size, $columns));
+}
+
+@mixin make-grid-columns(
+  $columns: g.$grid-columns,
+  $breakpoints: g.$grid-breakpoints
+) {
+
+  %grid-column {
+    flex: 0 0 auto;
+    min-height: 1px; // Prevent columns from collapsing when empty
+  }
+
+  // 基本クラス（ブレークポイントなし）をBEM準拠に
+  .col {
+    flex: 1 0 0%;
+  }
+
+  @for $i from 1 through $columns {
+    .col--#{$i} {
+      @extend %grid-column;
+      @include make-col($i, $columns);
+    }
+  }
+
+  @each $breakpoint in map.keys($breakpoints) {
+    $infix: g.breakpoint-infix-modifier($breakpoint, $breakpoints);
+
+    // ブレークポイント付きクラスのみ
+    @if $infix != "" {
+      @for $i from 1 through $columns {
+        .col#{$infix}-#{$i} {
+          @extend %grid-column;
+        }
+      }
+    }
+
+    @include g.media-breakpoint-up($breakpoint, $breakpoints) {
+      @if $infix != "" {
+        .col#{$infix} {
+          flex: 1 0 0%;
+        }
+        // .col#{$infix}--auto {
+        //   flex: 0 0 auto;
+        //   width: auto;
+        // }
+
+        @for $i from 1 through $columns {
+          .col#{$infix}-#{$i} {
+            @include make-col($i, $columns);
+          }
+        }
+      }
+    }
+  }
+}
+
+@mixin flex-grid-layout($n, $selector: ".col") {
+
+  > li,
+  > #{$selector} {
+    // $pct: percentage(1 / $n);
+    $pct: percentage(math.div(1, $n));
+    // max-width: $pct;
+    width: $pct;
+  }
+}
+
+// -----------------------------------------------------------------
+// style
+// -----------------------------------------------------------------
+
+
+//
+// columns
+//
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.row--container {
+  @extend .row;
+  @include make-container();
+  @include make-container-max-widths();
+}
+
+@include make-grid-columns();
+
+
+//
+// block grid
+//
+.grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+
+  // @include make-row-gutters();
+  margin-right: calc(var(--gutter) * -1);
+  margin-left: calc(var(--gutter) * -1);
+}
+
+%grid-col {
+  // position: relative;
+  flex: 0 0 auto;
+  min-height: 1px;
+
+  // @include make-gutters();
+  padding-right: var(--gutter);
+  padding-left: var(--gutter);
+}
+
+// 基本グリッドクラス（ブレークポイントなし）- 一度だけ生成
+@for $i from 1 through 12 {
+  .grid--#{$i} {
+    & > li, & > .col {
+      @extend %grid-col;
+    }
+    @include flex-grid-layout($i);
+  }
+}
+
+// ブレークポイント付きグリッドクラスのみ
+@each $breakpoint in map.keys(g.$grid-breakpoints) {
+  $infix: g.breakpoint-infix-modifier($breakpoint, g.$grid-breakpoints);
+
+  @if $infix != "" {
+    @include g.media-breakpoint-up($breakpoint) {
+      @for $i from 1 through 12 {
+        .grid#{$infix}-#{$i} {
+          @include flex-grid-layout($i);
+        }
+      }
+    }
+  }
+}

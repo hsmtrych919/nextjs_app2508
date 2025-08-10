@@ -1,0 +1,39 @@
+@use "../foundation/variables" as v;
+@use "sass:math";
+
+// px付き変数マップ数値のみを出力
+@function strip-unit($num) {
+  @if type-of($num) == "number" and not unitless($num) {
+    @return $num / ($num * 0 + 1);
+  }
+  @return $num;
+}
+
+// 行間数値からline-height算出
+@function get_lh($fz, $lh) {
+  @return math.div($lh, $fz);
+}
+// lhから発生する余白を修正 数値のみ利用する場合もあるので単位なし
+@function diff_lh($size,$fz,$lh) {
+  $lh: math.div($lh, $fz);
+  // @return round($size - $fz * ($lh - 1) / 2 );
+  @return round($size - math.div($fz * $lh - 1, 2) );
+}
+// xsサイズ対象 pxをvwに変換
+@function get_vw($size, $view:390) {
+  @return math.div(100, $view) * $size * 1vw;
+}
+
+// パーセント換算
+@function px-to-per($px,$view:390) {
+  @return math.div($px, $view) * 100%;
+}
+// vw換算
+@function px-to-vw($px,$view:390) {
+  @return math.div($px, $view) * 100vw;
+}
+// rem換算
+@function rem($size) {
+  $base-fz: 16;
+  @return math.div($size , $base-fz) * 1rem;
+}

@@ -1,0 +1,205 @@
+@charset "utf-8";
+@use "sass:color";
+@use "../global/global" as g;
+@use "../global/mixins" as m;
+
+// -----------------------------------------------------------------
+// mixin (from _button.scss)
+// -----------------------------------------------------------------
+
+@mixin button {
+  display: block;
+  position: relative;
+  max-width: 100%;
+  border-radius: g.$border-radius;
+  font-weight: 500;
+  line-height: 1;
+  cursor: pointer;
+}
+
+@mixin button__color(
+  $clr: #fff,
+  $bgc: g.$clr1,
+  $clr-hover: #fff,
+  $bgc-hover: color.scale(g.$clr1, $lightness: 5%)
+) {
+  background-color: $bgc;
+  color: $clr;
+
+  @include m.hover {
+    background-color: $bgc-hover;
+    color: $clr-hover;
+  }
+
+  &.ignore:hover, &.ignore:focus {
+    background-color: $bgc;
+    color: $clr;
+  }
+}
+
+@mixin button__color--border(
+  $clr: g.$clr1,
+  $bgc: #fff,
+  $bdc: g.$clr1,
+  $clr-hover: #fff,
+  $bgc-hover: g.$clr1,
+  $bdc-hover: g.$clr1
+) {
+  border-width: 1px;
+  border-style: solid;
+  border-color: $bdc;
+  background-color: $bgc;
+  color: $clr;
+
+  @include m.hover {
+    border-color: $bdc-hover;
+    background-color: $bgc-hover;
+    color: $clr-hover;
+  }
+
+  &.ignore:hover, &.ignore:focus {
+    border-color: $bdc;
+    background-color: $bgc;
+    color: $clr;
+  }
+}
+
+// -----------------------------------------------------------------
+// Original button styles
+// -----------------------------------------------------------------
+
+.sample {
+  display: block;
+  width: 300px;
+  max-width: 100%;
+  margin-right: auto;
+  margin-left: auto;
+  padding: 15px 0;
+  transition: all .2s ease;
+  border-radius: g.$border-radius;
+  background-color: var(--clrg400);
+  color: #fff;
+  font-size: 16px;
+  font-weight: bold;
+  line-height: 1.4;
+  text-align: center;
+  @include m.hover {
+    background-color: var(--clrg500);
+    color: #fff;
+  }
+}
+
+// -----------------------------------------------------------------
+// Button styles from _button.scss
+// -----------------------------------------------------------------
+
+.base {
+  @include button;
+  padding: g.rem(20) g.rem(18) g.rem(16);
+  font-size: g.rem(17);
+  @media #{g.$lg} {
+    font-size: g.rem(18);
+  }
+  @media #{g.$xxl} {
+    padding: g.rem(22) g.rem(18) g.rem(18);
+    font-size: g.rem(19);
+  }
+
+  &--thin {
+    @include button;
+    padding: g.rem(16) g.rem(14) g.rem(14);
+    font-size: g.rem(17);
+    @media #{g.$xxl} {
+      font-size: g.rem(18);
+    }
+  }
+}
+
+.icon--arrow {
+  position: absolute;
+  top: 50%;
+  right: g.rem(6);
+  width: g.rem(26);
+  transform: translate3d(0, -50%, 0);
+  transition: transform .2s ease-in-out;
+}
+
+.icon--external {
+  position: absolute;
+  top: 50%;
+  right: g.rem(8);
+  width: g.rem(24);
+  transform: translate3d(0, -50%, 0);
+}
+
+.icon--telephone {
+  position: absolute;
+  top: 52.5%;
+  left: g.rem(12);
+  width: g.rem(24);
+  transform: translate3d(0, -50%, 0);
+}
+
+.gradient {
+  @include button__color(
+    $clr: #fff,
+    $bgc: g.$clr1,
+    $clr-hover: #fff,
+    $bgc-hover: color.scale(g.$clr1, $lightness: 10%)
+  );
+  background: var(--grd1);
+  @include m.hover {
+    opacity: 0.8;
+    .icon--arrow {
+      transform: translate3d(g.rem(4), -50%, 0);
+    }
+  }
+}
+
+// .c-button__clr1 {
+//   @include button__color(
+//     $clr: #fff,
+//     $bgc: color.scale(g.$clr1, $lightness: -5%),
+//     $clr-hover: #fff,
+//     $bgc-hover: color.scale(g.$clr1, $lightness: 0%)
+//   );
+// }
+
+.telephone {
+  @include button__color(
+    $clr: #fff,
+    $bgc: color.scale(g.$clr1, $lightness: -5%),
+    $clr-hover: #fff,
+    $bgc-hover: color.scale(g.$clr1, $lightness: 0%)
+  );
+  padding-left: g.rem(48) !important;
+  @include m.hover {
+    .icon--telephone {
+      color: #fff;
+    }
+  }
+  .icon--telephone {
+    color: #fff;
+  }
+}
+
+.border--clr1 {
+  @include button__color--border(
+    $clr: g.$clr1,
+    $bgc: #fff,
+    $bdc: g.$clr1,
+    $clr-hover: #fff,
+    $bgc-hover: g.$clr1,
+    $bdc-hover: g.$clr1
+  );
+  @include m.hover {
+    .icon--arrow {
+      transform: translate3d(g.rem(4), -50%, 0);
+    }
+  }
+}
+
+.ignore {
+  opacity: 1 !important;
+  cursor: default !important;
+}

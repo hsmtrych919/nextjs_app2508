@@ -1,0 +1,61 @@
+@charset "utf-8";
+@use "../global" as g;
+
+// -----------------------------------------------------------------
+// CSS Variables for Grid System
+// -----------------------------------------------------------------
+// Extracted from _grid.scss to avoid CSS Modules :root conflicts
+// These variables are used by both global grid classes and modularized components
+
+:root {
+  --unit: #{g.get_vw(1, 390)};
+  --space: #{g.get_vw(8, 390)};
+  --gutter: #{g.get_vw(6, 390)};
+  --gutter-row: #{g.get_vw(16, 390)};
+  @media #{g.$sm} {
+    // min 576
+    --unit: #{g.get_vw(1, 768)};
+    --space: #{g.get_vw(8, 768)};
+    // 576で 1vw 0.733333px
+    // 768で 1vw 0.983333px
+    // 810で 1vw 1.05px
+    --gutter: #{g.get_vw(12, 768)};
+    --gutter-row: #{g.get_vw(42, 768)};
+  }
+  @media #{g.$md} {
+    // min 811
+    --unit: #{g.get_vw(1, 960)};
+    --space: #{g.get_vw(8, 960)};
+    // 811で 1vw 0.833333px
+    // 1024で 1vw 1.05px
+    --gutter: #{g.get_vw(16, 960)};
+    --gutter-row: #{g.get_vw(32, 960)};
+  }
+  @media #{g.$lg} {
+    // min 1025
+    --unit: #{g.get_vw(1, 1025)};
+    --space: #{g.get_vw(8, 1025)};
+    --gutter: #{g.get_vw(16, 1025)};
+    --gutter-row: #{g.get_vw(32, 1025)};
+  }
+  @media #{g.$xl} {
+    // min 1280
+    --unit: #{g.get_vw(1, 1280)};
+    --space: #{g.get_vw(8, 1280)};
+    --gutter: #{g.get_vw(16, 1280)};
+    --gutter-row: #{g.get_vw(32, 1280)};
+  }
+  @media #{g.$xxl} {
+    // min 1366
+    --unit: #{g.get_vw(1, 1366)};
+    --space: #{g.get_vw(8, 1366)};
+    --gutter: #{g.get_vw(16, 1366)};
+    --gutter-row: #{g.get_vw(32, 1366)};
+  }
+  // 1366以降はそのままサイズアップ
+  // @media (min-width: 1600px) {
+  //   --unit: #{g.get_vw(1, 1600)};
+  //   --gutter: #{g.get_vw(16, 1600)};
+  //   --gutter-row: #{g.get_vw(32, 1600)};
+  // }
+}

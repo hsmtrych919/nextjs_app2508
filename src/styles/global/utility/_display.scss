@@ -1,0 +1,31 @@
+@use "sass:map";
+@use "../global" as g;
+//
+// Display utilities
+//
+
+@each $breakpoint in map.keys(g.$grid-breakpoints) {
+
+  @include g.media-breakpoint-up($breakpoint) {
+    $infix: g.breakpoint-infix($breakpoint, g.$grid-breakpoints);
+
+    .display-none#{$infix} {
+      display: none !important;
+    }
+    // .display__inline#{$infix} {
+    //   display: inline !important;
+    // }
+    // .display__inline-block#{$infix} {
+    //   display: inline-block !important;
+    // }
+    .display-block#{$infix} {
+      display: block !important;
+    }
+    // .display__table#{$infix}        { display: table !important; }
+    // .display__table-cell#{$infix}   { display: table-cell !important; }
+    // .display__flex#{$infix} {
+    //   display: flex !important;
+    // }
+    // .display__inline-flex#{$infix}  { display: inline-flex !important; }
+  }
+}

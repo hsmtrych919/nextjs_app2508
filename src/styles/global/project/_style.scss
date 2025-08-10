@@ -1,0 +1,151 @@
+@charset "utf-8";
+@use "sass:color";
+@use "../global" as g;
+@use "../../modules/grid.module.scss" as grid;
+
+// -----------------------------------------------------------------
+// mixin | extend
+// -----------------------------------------------------------------
+
+
+// -----------------------------------------------------------------
+// style
+// -----------------------------------------------------------------
+
+:root {
+  --clr1: #{g.$clr1};
+  --clr1-hover: #{color.scale(g.$clr1, $lightness: -20%)};
+  --clr2: #{g.$clr2};
+  --clr3: #{g.$clr3};
+  --clr4: #{g.$clr4};
+  --clr5: #{g.$clr5};
+  --grd1: #{g.$grd1};
+  --grd2: #{g.$grd2};
+  --clrg50: #{g.$clrg50};
+  --clrg100: #{g.$clrg100};
+  --clrg200: #{g.$clrg200};
+  --clrg300: #{g.$clrg300};
+  --clrg400: #{g.$clrg400};
+  --clrg500: #{g.$clrg500};
+  --clrg600: #{g.$clrg600};
+  --clrg700: #{g.$clrg700};
+  --clrg800: #{g.$clrg800};
+  --clrg900: #{g.$clrg900};
+  --black: #{g.$black};
+  --gray: #{g.$gray};
+  --bdrs: #{g.rem(6)};
+  --img-hover-opacity: 0.9;
+  --modal-height-photo:75vh;
+}
+
+// Typography global styles
+h1, h2 {
+  font-weight: normal;
+}
+
+// フェードインの変数
+$fadein-duration: 0.4s;
+$fadein-offset: 30px;
+
+// フェードインの基本スタイル
+.inview__fadein {
+  transform: translateY($fadein-offset);
+  backface-visibility: hidden; // GPUアクセラレーション有効化
+  transition: opacity $fadein-duration ease-out, transform $fadein-duration ease-out;
+  opacity: 0;
+  will-change: opacity, transform;
+
+  // @media (prefers-reduced-motion: reduce) {
+  //   transform: none;
+  //   transition: none;
+  // }
+}
+
+// 表示状態
+.is-inview {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+
+// swiper
+
+// .swiper-main {
+//   &__wrap {
+//     position: relative;
+//     padding: 0 var(--gutter-row) 32rem;
+//     overflow: hidden;
+//     @media #{g.$sm} {
+//       padding: 0 0 32rem;
+//     }
+//     @media #{g.$md} {
+//       padding: 0;
+//     }
+//   }
+//   &__container {
+//     overflow: visible;
+//     @media #{g.$sm} {
+//       overflow: hidden;
+//     }
+//   }
+//   &__list{
+
+//   }
+//   &__list--item {
+//     display: block;
+//     img {
+//       width: 100%;
+//     }
+//   }
+//   &__prev {
+//     left: -8px;
+//     @media #{g.$sm} {
+//       left: 24px;
+//     }
+//     @media #{g.$xl} {
+//       left: 44px;
+//     }
+//   }
+//   &__next {
+//     right: -8px;
+//     @media #{g.$sm} {
+//       right: 24px;
+//     }
+//     @media #{g.$xl} {
+//       right: 44px;
+//     }
+//   }
+//   &__pagination {
+//     bottom: 0 !important;
+//     @media #{g.$md} {
+//       display: none;
+//     }
+//   }
+//   // thumbnail
+//   &__thumbnail--wrap {
+//     display: none;
+//     @media #{g.$md} {
+//       display: flex;
+//     }
+//   }
+//   &__thumbnail {
+//   }
+//   &__thumbnail--list {
+//     @media #{g.$md} {
+//       height: auto;
+//       margin-top: 24rem;
+//       li {
+//         background-color: g.$clr3;
+//         cursor: pointer;
+//         img {
+//           transition: all .2s ease-in-out;
+//         }
+//         @include g.hover {
+//           img {
+//             opacity: 0.85;
+//           }
+//         }
+//       }
+//     }
+//   }
+// }

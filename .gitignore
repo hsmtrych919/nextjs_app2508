@@ -1,0 +1,10 @@
+node_modules/
+.claude/tmp/
+package-lock.json
+tsconfig.tsbuildinfo
+_dist/
+_dist
+.next/
+.serena/*
+!.serena/project.yml
+draft.jsx

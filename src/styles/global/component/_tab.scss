@@ -1,0 +1,47 @@
+@charset "utf-8";
+@use "../global" as g;
+
+// -----------------------------------------------------------------
+// style
+// -----------------------------------------------------------------
+
+.c-tab {
+  &__outer {
+    // border: 1px solid #0f0;
+  }
+  &__list {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+  }
+  &__list--item {
+    display: block;
+    flex: 0 1 32%;
+    padding: g.rem(12) g.rem(4) g.rem(8);
+    background-color: var(--clrg600);
+    color: #fff;
+    font-size: g.rem(14);
+    text-align: center;
+    cursor: pointer;
+    @media #{g.$sm} {
+      font-size: g.rem(17);
+    }
+    @media #{g.$md} {
+      font-size: g.rem(18);
+    }
+    &.js-active {
+      background-color: var(--clr1);
+    }
+  }
+  &__content {
+    margin-top: g.rem(24);
+    padding-top: g.rem(24);
+    border-top: 1px solid var(--clrg600);
+  }
+  &__item {
+    display: none;
+    &.js-active {
+      display: block;
+    }
+  }
+}

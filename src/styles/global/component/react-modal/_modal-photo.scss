@@ -1,0 +1,55 @@
+@charset "utf-8";
+// PhotoModal グローバルスタイル
+// ReactModalのグローバルクラス用スタイル定義
+
+.modal-photo__overlay {
+  display: flex;
+  position: fixed;
+  z-index: 1000;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  align-items: flex-start;
+  justify-content: center;
+  // padding-top: 16px;
+  transition: opacity 0.2s ease-in-out;
+  opacity: 0;
+  background-color:rgba(255, 255, 255, 0.7);
+    // background-color: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(4px);
+}
+
+.modal-photo__overlay--after-open {
+  opacity: 1;
+}
+
+.modal-photo__overlay--before-close {
+  opacity: 0;
+}
+
+.modal-photo__content {
+  position: relative;
+  width: 100%;
+// max-width: 94vw;
+  max-height: var(--modal-height-photo);
+  overflow: auto;
+  transform: scale(0.9);
+  transition: transform 0.2s ease-in-out;
+  // background-color:rgba(0, 0, 0, 0.6);
+}
+
+.modal-photo__overlay--after-open .modal-photo__content {
+  transform: scale(1);
+}
+
+.modal-photo__overlay--before-close .modal-photo__content {
+  transform: scale(0.9);
+}
+
+.modal-photo__body--open {
+  overflow: hidden;
+}
+
+
+

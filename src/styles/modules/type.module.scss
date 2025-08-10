@@ -1,0 +1,337 @@
+@charset "utf-8";
+@use "sass:color";
+@use "../global/global" as g;
+@use "../global/mixins" as m;
+
+// -----------------------------------------------------------------
+// mixin
+// -----------------------------------------------------------------
+
+
+%font-min {
+  font-family: "Times New Roman",
+    "Noto Serif JP",
+    "游明朝体",
+    YuMincho,
+    "游明朝",
+    "Yu Mincho",
+    "ヒラギノ明朝 ProN W3",
+    "Hiragino Mincho ProN",
+    "HGS明朝E",
+    "ＭＳ Ｐ明朝",
+    "MS PMincho",
+    serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+
+%ttl__xsmall {
+  font-size: g.rem(21);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-weight: 600;
+  @media #{g.$sm} {
+    font-size: min(calc(var(--unit) * 21), g.rem(22));
+  }
+
+  @media #{g.$lg} {
+    font-size: min(calc(var(--unit) * 22), g.rem(23));
+  }
+
+  @media #{g.$xl} {
+    font-size: min(calc(var(--unit) * 24), g.rem(25));
+  }
+}
+
+%ttl__small {
+  font-size: g.rem(21);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-weight: 600;
+  @media #{g.$sm} {
+    font-size: min(calc(var(--unit) * 22), g.rem(23));
+  }
+
+  @media #{g.$md} {
+  }
+
+  @media #{g.$lg} {
+    font-size: min(calc(var(--unit) * 24), g.rem(25));
+  }
+  @media #{g.$xl} {
+    font-size: min(calc(var(--unit) * 25), g.rem(26));
+  }
+}
+
+%ttl__medium {
+  font-size: g.rem(22);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-weight: 600;
+  @media #{g.$sm} {
+    font-size: min(calc(var(--unit) * 24), g.rem(25));
+  }
+  @media #{g.$md} {
+    font-size: min(calc(var(--unit) * 26), g.rem(27));
+  }
+  @media #{g.$lg} {
+    font-size: min(calc(var(--unit) * 30), g.rem(31));
+  }
+  @media #{g.$xl} {
+    font-size: min(calc(var(--unit) * 32), g.rem(33));
+  }
+}
+
+
+%ttl__large {
+  font-size: g.rem(24);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-weight: 600;
+  @media #{g.$sm} {
+    font-size: min(calc(var(--unit) * 28), g.rem(29));
+  }
+  @media #{g.$md} {
+    font-size: min(calc(var(--unit) * 31), g.rem(32));
+  }
+  @media #{g.$lg} {
+    font-size: min(calc(var(--unit) * 36), g.rem(37));
+  }
+  @media #{g.$xl} {
+    font-size: min(calc(var(--unit) * 40), g.rem(41));
+  }
+}
+
+
+// -----------------------------------------------------------------
+// style
+// -----------------------------------------------------------------
+
+
+//
+// タイトル
+//
+
+
+
+.title--xsmall {
+  @extend %ttl__xsmall;
+}
+
+.title--small {
+  @extend %ttl__small;
+}
+
+
+.title--medium {
+  @extend %ttl__medium;
+}
+
+
+.title--large {
+  @extend %ttl__large;
+}
+
+.title__underline--aligned {
+  padding-bottom: g.rem(2);
+  border-bottom: 1px solid var(--clr1);
+}
+
+
+//
+// プリセット
+//
+
+.title__rhombus {
+  display: inline-block;
+  position: relative;
+  padding: 0 g.rem(36);
+  font-size: g.rem(22);
+  font-weight: 400;
+  letter-spacing: 2em;
+  @media #{g.$sm} {
+    font-size: g.rem(23);
+  }
+
+  @media #{g.$md} {
+    padding: 0 g.rem(46);
+    font-size: g.rem(25);
+    letter-spacing: 4em;
+  }
+
+  @media #{g.$lg} {
+    font-size: g.rem(28);
+  }
+
+  @media #{g.$xl} {
+    font-size: g.rem(29);
+  }
+
+  &::before, &::after {
+    content: "";
+    display: block;
+    position: absolute;
+    top: 0;
+    width: g.rem(22);
+    height: 100%;
+    transform: translate3d(0, g.rem(-1), 0);
+    // background-image: url(../../../public/img/h1-rhombus.svg); // deleted file
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 100%;
+
+    @media #{g.$md} {
+      width: g.rem(30);
+    }
+  }
+
+  &::before {
+    left: 0;
+  }
+
+  &::after {
+    right: 0;
+  }
+}
+
+
+.title__horizontal {
+  display: inline-block;
+  padding: 0 g.rem(16);
+  background-color: #fff;
+  color: var(--clrg700);
+
+  &--yellow-bg {
+    background-color: #fff6ea;
+  }
+}
+
+.title__pattern--diagonal {
+  position: relative;
+  padding-bottom: g.rem(16);
+  background-image: url(/img/ptn_dgnl.svg);
+  background-repeat: repeat-x;
+  background-position: left bottom;
+  background-size: g.rem(6);
+}
+
+
+//
+// タイトル以外
+//
+
+@mixin typ__line-height {
+  line-height: 1.8;
+
+  @media #{g.$md} {
+    line-height: 2;
+  }
+}
+
+@mixin typ__line-height--thin {
+  line-height: 1.5;
+
+  @media #{g.$md} {
+    line-height: 1.7;
+  }
+}
+
+.text {
+
+  @include typ__line-height;
+  font-size: min(g.get_vw(16), g.rem(17));
+
+  @media #{g.$sm} {
+    font-size: min(calc(var(--unit) * 16), g.rem(17));
+  }
+
+  @media #{g.$xxl} {
+    font-size: min(calc(var(--unit) * 17), g.rem(18));
+  }
+}
+
+.text--xs {
+
+  // @include typ__line-height;
+  font-size: g.get_vw(13);
+
+  @media #{g.$sm} {
+    font-size: min(calc(var(--unit) * 14), g.rem(15));
+  }
+
+  @media #{g.$lg} {
+    font-size: min(calc(var(--unit) * 15), g.rem(16));
+  }
+}
+
+
+.text--small {
+
+  @include typ__line-height;
+  font-size: min(g.get_vw(17), g.rem(18));
+
+  @media #{g.$sm} {
+    font-size: min(calc(var(--unit) * 18), g.rem(9));
+  }
+
+  @media #{g.$lg} {
+    font-size: min(calc(var(--unit) * 18), g.rem(20));
+  }
+}
+
+.text--medium {
+
+  @include typ__line-height;
+  font-size: g.get_vw(20);
+
+  @media #{g.$sm} {
+    font-size: min(calc(var(--unit) * 20), g.rem(21));
+  }
+
+  @media #{g.$lg} {
+    font-size: min(calc(var(--unit) * 20), g.rem(23));
+  }
+}
+
+.text--large {
+
+  @include typ__line-height;
+  font-size: g.get_vw(22);
+
+  @media #{g.$sm} {
+    font-size: min(calc(var(--unit) * 22), g.rem(23));
+  }
+
+  @media #{g.$lg} {
+    font-size: min(calc(var(--unit) * 23), g.rem(24));
+  }
+}
+
+
+.text--marker {
+  padding: 0 g.rem(2);
+  background: linear-gradient(transparent 60%, rgba(255, 169, 177, 0.5) 40%);
+}
+
+
+// %inter300 {
+//   font-family: Inter, sans-serif;
+//   -webkit-font-smoothing: antialiased;
+//   -moz-osx-font-smoothing: grayscale;
+//   font-weight: 300 !important;
+// }
+// %inter600 {
+//   font-family: Inter, sans-serif;
+//   -webkit-font-smoothing: antialiased;
+//   -moz-osx-font-smoothing: grayscale;
+//   font-weight: 600 !important;
+// }
+
+// .webfont__inter--300 {
+//   @extend %inter300;
+// }
+
+// .webfont__inter--600 {
+//   @extend %inter600;
+// }

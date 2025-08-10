@@ -1,0 +1,26 @@
+name: Slack Notification
+
+on:
+  issue_comment:
+    types: [created, edited]
+
+jobs:
+  notify:
+    if: |
+      contains(github.event.comment.body, 'Create a PR') &&
+      contains(github.event.comment.user.login, 'claude')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Debug comment info
+        run: |
+          echo "Comment author: ${{ github.event.comment.user.login }}"
+          echo "Comment body: ${{ github.event.comment.body }}"
+          echo "Issue title: ${{ github.event.issue.title }}"
+
+      - name: Send Slack notification
+        uses: 8398a7/action-slack@v3
+        with:
+          status: success
+          text: "🎉 Claude作業完了！ ${{ github.event.issue.html_url }} で「Create PR」をクリックしてね"
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

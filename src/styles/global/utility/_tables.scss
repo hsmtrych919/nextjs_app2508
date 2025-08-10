@@ -1,0 +1,196 @@
+@use "../global" as g;
+@use "../mixins" as m;
+
+//
+// Basic Bootstrap table
+//
+
+$table-cell-padding:            7.5rem !default;
+$table-sm-cell-padding:         3rem !default;
+
+$table-bg:                      transparent !default;
+
+$table-inverse-bg:              var(--clrg800) !default;
+$table-inverse-color:           g.$body-bg !default;
+
+$table-bg-accent:               rgba(g.$black, 0.05) !default;
+$table-bg-hover:                rgba(g.$black, 0.075) !default;
+$table-bg-active:               $table-bg-hover !default;
+
+$table-head-bg:                 var(--clrg200) !default;
+$table-head-color:              var(--clrg700) !default;
+
+$table-border-width:            1px !default;
+$table-border-color:            var(--clrg200) !default;
+
+
+//
+// reboot
+//
+
+table {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  table-layout: fixed;
+  border-spacing: 0;
+  // No longer part of Normalize since v4
+  border-collapse: collapse;
+  border: 0;
+  // Reset for nesting within parents with `background-color`.
+  background-color: $table-bg;
+}
+
+caption {
+  padding-top: $table-cell-padding;
+  padding-bottom: $table-cell-padding;
+  caption-side: bottom;
+  color: var(--clrg600);
+  text-align: left;
+}
+
+th {
+  // Centered by default, but left-align-ed to match the `td`s below.
+  text-align: left;
+}
+
+//
+// utility
+//
+
+
+.table {
+  width: 100%;
+  max-width: 100%;
+
+  th, td {
+    padding: $table-cell-padding;
+    border-top: $table-border-width solid $table-border-color;
+    vertical-align: top;
+  }
+
+  thead th {
+    border-bottom: (2 * $table-border-width) solid $table-border-color;
+    vertical-align: bottom;
+  }
+
+  tbody + tbody {
+    border-top: (2 * $table-border-width) solid $table-border-color;
+  }
+
+  .table {
+    background-color: g.$body-bg;
+  }
+}
+
+
+//
+// Condensed table w/ half padding
+//
+
+.table-sm {
+
+  th, td {
+    padding: $table-sm-cell-padding;
+  }
+}
+
+
+// Bordered version
+//
+// Add borders all around the table and between all the columns.
+
+.table-bordered {
+  border: $table-border-width solid $table-border-color;
+
+  th, td {
+    border: $table-border-width solid $table-border-color;
+  }
+
+  thead {
+
+    th, td {
+      border-bottom-width: (2 * $table-border-width);
+    }
+  }
+}
+
+
+// Zebra-striping
+//
+// Default zebra-stripe styles (alternating gray and transparent backgrounds)
+
+.table-striped {
+
+  tbody tr:nth-of-type(odd) {
+    background-color: $table-bg-accent;
+  }
+}
+
+
+// Hover effect
+//
+// Placed here since it has to come after the potential zebra striping
+
+.table-hover {
+
+  tbody tr {
+
+    @include m.hover {
+      background-color: $table-bg-hover;
+    }
+  }
+}
+
+
+// Inverse styles
+//
+// Same table markup, but inverted color scheme: dark background and light text.
+
+.thead-inverse {
+
+  th {
+    background-color: $table-inverse-bg;
+    color: $table-inverse-color;
+  }
+}
+
+.thead-default {
+
+  th {
+    background-color: $table-head-bg;
+    color: $table-head-color;
+  }
+}
+
+.table-inverse {
+  background-color: $table-inverse-bg;
+  color: $table-inverse-color;
+
+  th, td, thead th {
+    border-color: g.$body-bg;
+  }
+
+  &.table-bordered {
+    border: 0;
+  }
+}
+
+
+// Responsive tables
+//
+// Add `.table-responsive` to `.table`s and we'll make them mobile friendly by
+// enabling horizontal scrolling. Only applies <768px. Everything above that
+// will display normally.
+
+.table-responsive {
+  display: block;
+  width: 100%;
+  overflow-x: auto;
+  -ms-overflow-style: -ms-autohiding-scrollbar; // See https://github.com/twbs/bootstrap/pull/10057
+
+  // Prevent double border on horizontal scroll due to use of `display: block;`
+  &.table-bordered {
+    border: 0;
+  }
+}

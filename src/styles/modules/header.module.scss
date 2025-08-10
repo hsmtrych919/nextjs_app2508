@@ -1,0 +1,16 @@
+@charset "utf-8";
+@use "sass:color";
+@use "../global/global" as g;
+
+
+.outer {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--clrg300);
+}
+
+.logo {
+  width: 120px;
+  @media #{g.$md} {
+    width: 96px;
+  }
+}

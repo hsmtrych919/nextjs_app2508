@@ -1,0 +1,34 @@
+@charset "utf-8";
+@use "sass:map";
+@use "../global" as g;
+
+.mt-0 {
+  margin-top: 0 !important;
+}
+
+.mb-0 {
+  margin-bottom: 0 !important;
+}
+
+.mx-auto {
+  margin-right: auto !important;
+  margin-left: auto !important;
+}
+
+// @each $name, $value in g.$space_values_with_clamp {
+//   .mt__#{$name} {
+//     margin-top: $value;
+//   }
+// }
+
+@each $breakpoint in map.keys(g.$grid-breakpoints) {
+  @include g.media-breakpoint-up($breakpoint) {
+    $infix: g.breakpoint-infix($breakpoint, g.$grid-breakpoints);
+    @each $name, $value in g.$space_values {
+      .mt-#{$name}#{$infix} {
+        margin-top: g.rem($value);
+      }
+    }
+  }
+}
+

@@ -1,0 +1,14 @@
+@charset "utf-8";
+
+// @use "../global" as g; で利用
+
+// foundation
+@forward "../foundation/variables";
+@forward "../foundation/variables-color";
+
+// mixin
+@forward "breakpoints";
+@forward "calc";
+@forward "font";
+@forward "media-queries";
+@forward "unicode";

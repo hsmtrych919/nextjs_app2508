@@ -1,0 +1,69 @@
+{
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "build:deploy": "REAL_DEPLOY=true next build",
+    "start": "next start",
+    "serve": "npx serve _dist",
+    "imgmin": "node imagemin.config.js",
+    "eslint": "npx eslint --fix \"pages/**/*.{ts,tsx}\" \"components/**/*.{ts,tsx}\" \"features/**/*.{ts,tsx}\""
+  },
+  "browserslist": {
+    "development": [
+    "> 1%",
+    "last 2 versions",
+    "not dead",
+    "not ie 11"
+    ],
+    "production": [
+      "> 2% in JP",
+      "ios >= 15",
+      "not dead"
+    ]
+  },
+  "dependencies": {
+    "@heroicons/react": "^2.0.18",
+    "gsap": "^3.13.0",
+    "next": "^13.5",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-modal": "^3.16.1",
+    "scroll-hint": "^1.2.9",
+    "smooth-scroll": "^16.1.3"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.6.4",
+    "@testing-library/react": "^16.3.0",
+    "@types/gsap": "^3.0.0",
+    "@types/node": "^24.0.15",
+    "@types/react": "^19.1.8",
+    "@types/react-modal": "^3.16.3",
+    "@types/smooth-scroll": "^16.1.4",
+    "@typescript-eslint/eslint-plugin": "^8.37.0",
+    "@typescript-eslint/parser": "^8.37.0",
+    "autoprefixer": "^10.4.21",
+    "eslint": "^9.31.0",
+    "eslint-config-next": "^15.4.2",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-next": "0.0.0",
+    "identity-obj-proxy": "^3.0.0",
+    "imagemin": "^9.0.1",
+    "imagemin-gifsicle": "^7.0.0",
+    "imagemin-keep-folder": "^5.3.2",
+    "imagemin-mozjpeg": "^10.0.0",
+    "imagemin-pngquant": "^10.0.0",
+    "imagemin-svgo": "^11.0.1",
+    "jest": "^30.0.5",
+    "jest-environment-jsdom": "^30.0.5",
+    "postcss": "^8.5.6",
+    "prettier": "^3.6.2",
+    "sass": "^1.89.2",
+    "stylelint": "^16.23.0",
+    "stylelint-config-property-sort-order-smacss": "^10.0.0",
+    "stylelint-config-recommended-scss": "^15.0.1",
+    "stylelint-scss": "^6.12.1",
+    "ts-jest": "^29.4.1",
+    "typescript": "^5.8.3"
+  }
+}

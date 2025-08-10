@@ -1,0 +1,9 @@
+@use "_unicode";
+
+
+@mixin webfont-lato($weight) {
+  font-family: Lato, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-weight: $weight !important;
+}

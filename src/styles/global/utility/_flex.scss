@@ -1,0 +1,111 @@
+@use "sass:map";
+@use "../global" as g;
+
+@each $breakpoint in map.keys(g.$grid-breakpoints) {
+
+  @include g.media-breakpoint-up($breakpoint) {
+    $infix: g.breakpoint-infix($breakpoint, g.$grid-breakpoints);
+    // $infix-before: g.breakpoint-infix-before($breakpoint, g.$grid-breakpoints);
+
+    // .flex__row#{$infix} {
+    // flex-direction:row !important;
+    // }
+    // .flex__column#{$infix} {
+    // flex-direction: column !important;
+    // }
+    // .flex__row-reverse#{$infix} {
+    // flex-direction: row-reverse !important;
+    // }
+    // .flex__column-reverse#{$infix} {
+    // flex-direction: column-reverse !important;
+    // }
+
+    // .flex__wrap#{$infix} {
+    // flex-wrap: wrap !important;
+    // }
+    // .flex__nowrap#{$infix} {
+    // flex-wrap: nowrap !important;
+    // }
+    // .flex__wrap-reverse#{$infix} {
+    // flex-wrap: wrap-reverse !important;
+    // }
+
+    .jc-start#{$infix} {
+      justify-content: flex-start !important;
+    }
+    .jc-end#{$infix} {
+      justify-content: flex-end !important;
+    }
+    .jc-center#{$infix} {
+      justify-content: center !important;
+    }
+    .jc-between#{$infix} {
+      justify-content: space-between !important;
+    }
+    .jc-around#{$infix} {
+      justify-content: space-around !important;
+    }
+
+    .ai-start#{$infix} {
+      align-items: flex-start !important;
+    }
+    .ai-end#{$infix} {
+      align-items: flex-end !important;
+    }
+    .ai-center#{$infix} {
+      align-items: center !important;
+    }
+    .ai-baseline#{$infix} {
+      align-items: baseline !important;
+    }
+    .ai-stretch#{$infix} {
+      align-items: stretch !important;
+    }
+
+    // .ac__start#{$infix} {
+    // align-content: flex-start !important;
+    // }
+    // .ac__end#{$infix} {
+    // align-content: flex-end !important;
+    // }
+    // .ac__center#{$infix} {
+    // align-content: center !important;
+    // }
+    // .ac__between#{$infix} {
+    // align-content: space-between !important;
+    // }
+    // .ac__around#{$infix} {
+    // align-content: space-around !important;
+    // }
+    // .ac__stretch#{$infix} {
+    // align-content: stretch !important;
+    // }
+
+    .as-auto#{$infix} {
+      align-self: auto !important;
+    }
+    .as-start#{$infix} {
+      align-self: flex-start !important;
+    }
+    .as-end#{$infix} {
+      align-self: flex-end !important;
+    }
+    .as-center#{$infix} {
+      align-self: center !important;
+    }
+    .as-baseline#{$infix} {
+      align-self: baseline !important;
+    }
+    .as-stretch#{$infix} {
+      align-self: stretch !important;
+    }
+
+    //order
+    @for $i from 1 through 6 {
+      .order-#{$i}#{$infix} {
+        order: $i !important;
+      }
+    }
+  }
+}
+

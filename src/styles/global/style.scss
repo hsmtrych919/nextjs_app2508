@@ -1,0 +1,55 @@
+@charset "utf-8";
+
+/*!
+ * Bootstrap v4.0.0-alpha.6 (https://getbootstrap.com)
+ * Copyright 2011-2017 The Bootstrap Authors
+ * Copyright 2011-2017 Twitter, Inc.
+ * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
+ */
+
+// -----------------------------------------------------------------
+// Foundation
+// -----------------------------------------------------------------
+
+@use "foundation/_destyle";
+@use "foundation/_reboot";
+
+// -----------------------------------------------------------------
+// Layout
+// -----------------------------------------------------------------
+
+@use "layout/_grid-variables";
+
+// -----------------------------------------------------------------
+// Object / Component
+// -----------------------------------------------------------------
+
+//プラグイン優先
+@use "component/react-modal/react-modal";
+@use "component/react-modal/modal-photo";
+@use "component/react-modal/modal-footer";
+// @use "component/swiper/swiper-bundle";
+@use "component/_tab";
+@use "component/_table";
+@use "component/_toggle";
+
+// -----------------------------------------------------------------
+// Object / Project
+// -----------------------------------------------------------------
+
+@use "project/style" as p-content;
+
+// -----------------------------------------------------------------
+// Object / Utility
+// -----------------------------------------------------------------
+
+@use "utility/_display";
+@use "utility/_flex";
+@use "utility/_font";
+@use "utility/_margin";
+@use "utility/_padding";
+@use "utility/_responsive-embed";
+// @use "utility/_tables";
+@use "utility/_scroll-hint";
+@use "utility/_visibility";
+

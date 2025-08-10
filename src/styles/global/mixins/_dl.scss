@@ -1,0 +1,156 @@
+@charset "utf-8";
+@use "../global" as g;
+
+
+@mixin style__flex (
+  $border: 1px dashed var(--clrg600),
+  $dtWidth:180px
+) {
+  &__dl {
+    overflow: hidden;
+    @media #{g.$md} {
+      line-height: 1.7;
+    }
+    dt {
+      width: 100%;
+      padding: 12px 0 8px 4px;
+      border-top: #{$border};
+      background-color: #f5f5f5;
+      @media #{g.$sm} {
+        width: $dtWidth;
+        padding: 16px 0 14px 14px;
+        border-top: none;
+        background-color: transparent;
+      }
+    }
+    dd {
+      padding: 14px 4px 16px;
+      border-top: #{$border};
+      @media #{g.$sm} {
+        width: 100%;
+        padding: 16px 14px 14px 14px;
+        border-top: none;
+      }
+    }
+    &::before, &::after {
+      content: "";
+      display: block;
+      width: 100%;
+      border-bottom: #{$border};
+    }
+  }
+  &__dt--fot {
+    border-top: none;
+  }
+  &__row {
+    @media #{g.$sm} {
+      display: flex;
+      border-top: #{$border};
+      &:first-of-type {
+        border-top: none;
+      }
+      &:nth-of-type(even) {
+        // background-color: #f5f5f5;
+      }
+    }
+  }
+}
+
+// %flex__sample{
+//   @include dl.style__flex($border: 1px dashed var(--clrg600),$dtWidth:35%);
+//   &__dl {
+//     dt {
+//     }
+//     dd {
+//     }
+//   }
+//   &__row {
+//   }
+// }
+
+//html
+// <dl class="__dl">
+//   <div class="__row">
+//     <dt class="__dt--fot">hghg</dt>
+//     <dd>foo</dd>
+//   </div>
+//   <div class="__row">
+//     <dt>hghg</dt>
+//     <dd>foo</dd>
+//   </div>
+// </dl>
+
+
+@mixin style__menu(
+  $dtClr: var(--black),
+  $border: 1px dashed var(--clrg600),
+  $dtWidth: 138px
+) {
+  width: 100%;
+  overflow: hidden;
+  @media #{g.$sm} {
+    width: 50%;
+  }
+  & dt {
+    width: 100%;
+    padding: 12px 0 6px;
+    // border-top: #{$border};
+    @media #{g.$md} {
+      padding: 20px 0 6px 0;
+    }
+  }
+
+  & dd {
+    padding: 12px 0 20px;
+    border-top: #{$border};
+
+    @media #{g.$sm} {
+      padding: 12px 0;
+    }
+    @media #{g.$md} {
+      padding: 10px 0 0 0;
+    }
+  }
+}
+
+// サンプル
+// %menu__sample{
+//   @include dl.style__menu($dtWidth:70%);
+//   // dl {
+//        font-size:20px;
+//        font-weight: 500;
+//    & dt {
+//      i {
+//        color: var(--clr2);
+//      }
+//    }
+//    dd {
+//        font-size:20px;
+//      &:last-of-type {
+//        @media #{g.$sm}{
+//          padding-bottom: 0;
+//        }
+//      }
+//    }
+//   // }
+// }
+
+// %p-menu__sample{
+//   &--left{
+//     @extend %menu__sample;
+//     @media #{g.$sm}{
+//       padding-right: calc(var(--gutter) * 1.6);
+//     }
+//   }
+//   &--right{
+//     @extend %menu__sample;
+//     @media #{g.$sm}{
+//       padding-left: calc(var(--gutter) * 1.6);
+//     }
+//   }
+//   &--price{
+//     font-size: 18px;
+//     color: var(--clr2);
+//     letter-spacing: 2px;
+//   }
+// }

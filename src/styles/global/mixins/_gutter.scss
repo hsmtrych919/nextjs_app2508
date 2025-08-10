@@ -1,0 +1,21 @@
+@use "../global/_media-queries" as g;
+
+@mixin gutter {
+  padding-right: var(--gutter-row);
+  padding-left: var(--gutter-row);
+
+  @media #{g.$md} {
+    padding-right: 0;
+    padding-left: 0;
+  }
+}
+
+@mixin gutter_row {
+  padding-right: var(--gutter-row);
+  padding-left: var(--gutter-row);
+
+  @media #{g.$xl} {
+    padding-right: 0;
+    padding-left: 0;
+  }
+}

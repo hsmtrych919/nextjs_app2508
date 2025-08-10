@@ -1,0 +1,116 @@
+@charset "utf-8";
+@use "../global" as g;
+
+// -----------------------------------------------------------------
+// style
+// -----------------------------------------------------------------
+
+
+%table-spec {
+  & th {
+    padding: g.rem(8) g.rem(5) g.rem(3);
+    border: 1px solid var(--clrg700);
+    background-color: var(--clrg300);
+    font-weight: 500;
+    text-align: center;
+    vertical-align: middle;
+  }
+  & td {
+    padding: g.rem(5) g.rem(5) g.rem(3);
+    border: 1px solid var(--clrg700);
+    text-align: center;
+    vertical-align: middle;
+  }
+  &__caption {
+    font-size: g.rem(10);
+    font-weight: normal;
+  }
+  &__unit {
+    margin-left: g.rem(5);
+    font-size: g.rem(12);
+    font-weight: normal;
+  }
+}
+
+.c-table-spec {
+  width: 100%;
+  min-width: 720px;
+  border-collapse: collapse;
+  border: 1px solid;
+  @extend %table-spec;
+}
+
+.c-table-spec--half {
+  width: 100%;
+  min-width: 450px;
+  @media #{g.$md} {
+    min-width: auto;
+  }
+  border-collapse: collapse;
+  border: 1px solid;
+  @extend %table-spec;
+}
+
+.c-table__responsive {
+  overflow-x: scroll;
+  -webkit-overflow-scrolling: touch;
+  @media #{g.$md} {
+    overflow-x: auto;
+  }
+}
+
+%table__shadow {
+  content: "";
+  display: none;
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  width: 30px;
+  height: 100%;
+}
+
+.c-table__responsive--outer {
+  position: relative;
+  width: calc(100% + var(--gutter-row));
+  &::before {
+    @extend %table__shadow;
+    left: 0;
+    box-shadow: inset 12px 0 12px -12px rgba(g.$black, 0.8);
+  }
+  &::after {
+    @extend %table__shadow;
+    right: 0;
+    box-shadow: inset -12px 0 12px -12px rgba(g.$black, 0.8);
+  }
+  &.js-shadow__before {
+    &::before {
+      display: block;
+    }
+  }
+  &.js-shadow__after {
+    &::after {
+      display: block;
+    }
+  }
+  // &.js-scroll__end--before {
+  //   &::before {
+  //     display: none;
+  //   }
+  // }
+  // &.js-scroll__end--after {
+  //   &::after {
+  //     display: none;
+  //   }
+  // }
+  @media #{g.$sm} {
+    width: 100%;
+  }
+  @media #{g.$md} {
+    &::before {
+      display: none;
+    }
+    &::after {
+      display: none;
+    }
+  }
+}

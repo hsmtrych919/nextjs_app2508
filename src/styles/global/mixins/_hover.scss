@@ -1,0 +1,67 @@
+$enable-hover-media-query:  false !default;
+
+@mixin hover {
+  // TODO: re-enable along with mq4-hover-shim
+  @if $enable-hover-media-query {
+    @media (hover: hover) {
+      &:hover { @content }
+    }
+  }
+  @else {
+    @media(hover: hover) and (pointer: fine) {
+      &:focus,
+      &:hover {
+        @content;
+      }
+    }
+  }
+
+}
+
+
+// @mixin hover-focus {
+//   @if $enable-hover-media-query {
+//     &:focus { @content }
+//     @include hover { @content }
+//   }
+//   @else {
+//     &:focus,
+//     &:hover {
+//       @content
+//     }
+//   }
+// }
+
+// @mixin plain-hover-focus {
+//   @if $enable-hover-media-query {
+//     &,
+//     &:focus {
+//       @content
+//     }
+//     @include hover { @content }
+//   }
+//   @else {
+//     &,
+//     &:focus,
+//     &:hover {
+//       @content
+//     }
+//   }
+// }
+
+// @mixin hover-focus-active {
+//   @if $enable-hover-media-query {
+//     &:focus,
+//     &:active {
+//       @content
+//     }
+//     @include hover { @content }
+//   }
+//   @else {
+//     &:focus,
+//     &:active,
+//     &:hover {
+//       @content
+//     }
+//   }
+// }

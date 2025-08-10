@@ -1,0 +1,8 @@
+@use "sass:map";
+@use "../global" as g;
+
+@mixin z-index($key) {
+  z-index: map.get(g.$layout-zindex, $key);
+}
+
+// @include z-index($key);

@@ -1,0 +1,32 @@
+@charset "utf-8";
+@use "sass:color";
+
+// clr lib
+$clr1: #4FBA43 !default;
+$clr2: #9BD22D !default;
+$clr3: #725907 !default;
+$clr4: #B69941 !default;
+$clr5: #f6f0dd !default;
+// $clr6: #B89A00 !default;
+$clr-prim-green:#41c45d !default;
+$grd1 : linear-gradient(120deg, #9BD22D, #4FBA43) !default;
+$grd2 : linear-gradient(90deg, #FDD88A, #9E8004) !default;
+
+$black:  #222 !default;
+$clrg50: color.scale($black, $lightness: 98%) !default;
+$clrg100: color.scale($black, $lightness: 96%) !default;
+$clrg200: color.scale($black, $lightness: 93%) !default;
+$clrg300: color.scale($black, $lightness: 88%) !default;
+$clrg400: color.scale($black, $lightness: 74%) !default;
+$clrg500: color.scale($black, $lightness: 62%) !default;
+$clrg600: color.scale($black, $lightness: 46%) !default;
+$clrg700: color.scale($black, $lightness: 38%) !default;
+$clrg800: color.scale($black, $lightness: 26%) !default;
+$clrg900: color.scale($black, $lightness: 13%) !default;
+$gray:  $clrg700 !default;
+
+$body-bg:       #fff !default;
+$body-color:    $black !default;
+$link-color: $clrg800 !default;
+$link-hover-color: color.scale($link-color, $lightness: 15%) !default;
+
