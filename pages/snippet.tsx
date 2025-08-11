@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import Layout from '@/components/layout/layout';
-import SimpleModalDemo from '@/components/ui/ModalDemo';
-import SimpleToggleDemo from '@/components/ui/ToggleDemo';
-import SimpleTabDemo from '@/components/ui/TabDemo';
-import SimpleTableDemo from '@/components/ui/TableDemo';
-import { ButtonType01, ButtonType02 } from '@/components/ui/ButtonDemo';
-import GridDemo from '@/components/ui/GridDemo';
+import SimpleModalDemo from '@/components/ui/modalDemo';
+import SimpleToggleDemo from '@/components/ui/toggleDemo';
+import SimpleTabDemo from '@/components/ui/tabDemo';
+import SimpleTableDemo from '@/components/ui/tableDemo';
+import { ButtonType01, ButtonType02 } from '@/components/ui/buttonDemo';
+import GridDemo from '@/components/ui/gridDemo';
 import VideoPlayer from '@/components/ui/VideoPlayer';
 import GridPhoto from '@/components/ui/GridPhoto';
 import ModalPhoto from '@/components/ui/ModalPhoto';

@@ -12,9 +12,10 @@ export const settings = sqliteTable('settings', {
 });
 
 // 銘柄保有情報テーブル
+// Agent1のSATELLITE_TICKERSと統合されたティッカーに対応
 export const holdings = sqliteTable('holdings', {
   id: text('id').primaryKey(),
-  ticker: text('ticker').notNull(), // AMZN, GOOGL, etc.
+  ticker: text('ticker').notNull(), // Agent1統合済み21銘柄: AMZN,AVGO,COIN,CRM,CRWD,GOOGL,META,MSFT,NFLX,NVDA,ORCL,PLTR,PYPL,SHOP,SNOW,SQ,TSLA,UBER,V,WDAY,ZM
   tier: integer('tier').notNull(), // 1, 2, 3, 4, 5 (Tierレベル)
   entryPrice: real('entry_price').notNull(), // エントリー価格（USD）
   holdShares: integer('hold_shares').notNull(), // 保有株数

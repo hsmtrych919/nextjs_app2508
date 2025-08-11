@@ -6,45 +6,45 @@
 
 .satelliteApp {
   min-height: 100vh;
-  background: g.$color-bg-base;
   padding-bottom: 2rem;
+  background: g.$clrg50;
 }
 
 // ヘッダーセクション
 .header {
+  margin-bottom: 1rem;
+  padding: 2rem 0 3rem;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
-  padding: 2rem 0 3rem;
-  margin-bottom: 1rem;
 
   .title {
+    margin-bottom: 0.5rem;
     font-size: 1.5rem;
     font-weight: 700;
-    margin-bottom: 0.5rem;
     text-align: center;
   }
 
   .subtitle {
-    font-size: 0.9rem;
-    opacity: 0.9;
-    text-align: center;
     margin: 0;
+    opacity: 0.9;
+    font-size: 0.9rem;
+    text-align: center;
   }
 }
 
 // カード共通スタイル
 %card-base {
-  background: white;
-  border-radius: 12px;
-  padding: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   margin-bottom: 1rem;
+  padding: 1.5rem;
+  border-radius: 12px;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 
   h2 {
+    margin-bottom: 1rem;
+    color: g.$black;
     font-size: 1.1rem;
     font-weight: 600;
-    margin-bottom: 1rem;
-    color: g.$color-text-base;
   }
 }
 
@@ -75,17 +75,17 @@
   padding: 0.8rem;
   border: 1px solid #e1e5e9;
   border-radius: 8px;
-  
+
   label {
-    font-size: 0.8rem;
-    color: g.$color-text-sub;
     margin-bottom: 0.3rem;
+    color: g.$clrg400;
+    font-size: 0.8rem;
   }
 
   span {
+    color: g.$black;
     font-size: 1rem;
     font-weight: 600;
-    color: g.$color-text-base;
 
     &.profit {
       color: #16a085;
@@ -116,14 +116,14 @@
 .formationButton {
   width: 100%;
   padding: 1rem;
+  transition: all 0.2s ease;
   border: 2px solid #e1e5e9;
   border-radius: 8px;
   background: white;
+  color: g.$black;
   font-size: 0.9rem;
   font-weight: 500;
-  color: g.$color-text-base;
   cursor: pointer;
-  transition: all 0.2s ease;
 
   &:hover {
     border-color: #667eea;
@@ -140,15 +140,15 @@
 .selectedFormation {
   margin-top: 1rem;
   padding: 1rem;
-  background: #f8f9ff;
-  border-radius: 8px;
   border: 1px solid #e1e5e9;
+  border-radius: 8px;
+  background: #f8f9ff;
 
   h3 {
+    margin-bottom: 0.8rem;
+    color: g.$black;
     font-size: 1rem;
     font-weight: 600;
-    margin-bottom: 0.8rem;
-    color: g.$color-text-base;
   }
 }
 
@@ -160,26 +160,26 @@
 
 .tierItem {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
   padding: 0.6rem 0.8rem;
-  background: white;
   border-radius: 6px;
+  background: white;
   font-size: 0.85rem;
 
   span:first-child {
+    color: g.$black;
     font-weight: 500;
-    color: g.$color-text-base;
   }
 
   span:nth-child(2) {
-    font-weight: 600;
     color: #667eea;
+    font-weight: 600;
   }
 
   span:last-child {
+    color: g.$black;
     font-weight: 600;
-    color: g.$color-text-base;
   }
 }
 
@@ -200,28 +200,28 @@
 
 .statItem {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
   padding: 0.8rem;
-  background: #f8f9ff;
   border-radius: 6px;
+  background: #f8f9ff;
   font-size: 0.85rem;
 
   span:first-child {
-    font-weight: 500;
-    color: g.$color-text-base;
     flex: 1;
+    color: g.$black;
+    font-weight: 500;
   }
 
   span:nth-child(2) {
-    font-weight: 600;
-    color: #667eea;
     margin-right: 1rem;
+    color: #667eea;
+    font-weight: 600;
   }
 
   span:last-child {
+    color: g.$clrg400;
     font-size: 0.8rem;
-    color: g.$color-text-sub;
   }
 }
 
@@ -238,24 +238,24 @@
 }
 
 .errorCard {
-  background: #fee;
   border-left: 4px solid #e74c3c;
+  background: #fee;
 
   p {
+    margin: 0;
     color: #c0392b;
     font-weight: 500;
-    margin: 0;
   }
 }
 
 .loadingCard {
-  background: #f0f8ff;
   border-left: 4px solid #3498db;
+  background: #f0f8ff;
 
   p {
+    margin: 0;
     color: #2980b9;
     font-weight: 500;
-    margin: 0;
   }
 }
 
@@ -264,7 +264,7 @@
   .satelliteApp {
     .header {
       padding: 1.5rem 0 2.5rem;
-      
+
       .title {
         font-size: 1.3rem;
       }

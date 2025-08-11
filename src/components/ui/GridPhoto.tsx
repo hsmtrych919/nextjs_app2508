@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from '@/styles/modules/photo-modal.module.scss';
+import styles from '@/styles/modules/modal-photo.module.scss';
 import gridStyles from '@/styles/modules/grid.module.scss';
 import { ImgPath } from '@/lib/utils/rewritePath';
 import { PhotoImage } from '@/lib/constants/photoModal';

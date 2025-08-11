@@ -135,7 +135,11 @@ export default async function handler(
     if (req.method !== 'POST') {
       return res.status(405).json({
         success: false,
-        message: `Method ${req.method} Not Allowed`
+        timestamp: new Date().toISOString(),
+        error: {
+          code: 'METHOD_NOT_ALLOWED',
+          message: `Method ${req.method} Not Allowed`
+        }
       });
     }
 
@@ -148,8 +152,12 @@ export default async function handler(
     if (!changeCheck.hasChanged) {
       return res.status(200).json({
         success: true,
-        message: 'No changes detected since last check',
-        changesDetected: false
+        timestamp: new Date().toISOString(),
+        data: {
+          message: 'No changes detected since last check',
+          changesDetected: false,
+          processedFormations: []
+        }
       });
     }
 
@@ -166,9 +174,13 @@ export default async function handler(
 
     res.status(200).json({
       success: true,
-      message: `Formation usage statistics updated for ${changeCheck.currentFormationId}`,
-      changesDetected: true,
-      updatedUsage: updatedStats
+      timestamp: new Date().toISOString(),
+      data: {
+        message: `Formation usage statistics updated for ${changeCheck.currentFormationId}`,
+        changesDetected: true,
+        processedFormations: [changeCheck.currentFormationId],
+        updatedUsage: updatedStats
+      }
     });
 
   } catch (error) {
@@ -178,7 +190,11 @@ export default async function handler(
     if (process.env.NODE_ENV === 'development') {
       return res.status(500).json({
         success: false,
-        message: `Development error: ${error instanceof Error ? error.message : 'Unknown error'}`
+        timestamp: new Date().toISOString(),
+        error: {
+          code: 'DEVELOPMENT_ERROR',
+          message: `Development error: ${error instanceof Error ? error.message : 'Unknown error'}`
+        }
       });
     }
     
@@ -188,7 +204,11 @@ export default async function handler(
     
     res.status(500).json({
       success: false,
-      message: 'Cron job execution failed'
+      timestamp: new Date().toISOString(),
+      error: {
+        code: 'CRON_EXECUTION_ERROR',
+        message: 'Cron job execution failed'
+      }
     });
   }
 }

@@ -9,6 +9,42 @@ import {
   StockHoldingType,
   FORMATION_DEFINITIONS 
 } from '../constants/types';
+// Agent2のAPI統合型を追加インポート
+import type { 
+  HoldingType as Agent2HoldingType,
+  BudgetType as Agent2BudgetType,
+  FormationType as Agent2FormationType,
+  FORMATIONS
+} from './types';
+
+// Agent1⇔Agent2 型変換ユーティリティ
+const convertAgent1ToAgent2Holding = (stock: StockHoldingType): Agent2HoldingType => ({
+  id: stock.id,
+  ticker: stock.ticker,
+  tier: 1, // デフォルト値、実際の使用時に適切に設定
+  entryPrice: stock.entryPrice,
+  holdShares: stock.holdShares,
+  goalShares: stock.goalShares,
+  updatedAt: new Date().toISOString()
+});
+
+const convertAgent2ToAgent1Holding = (holding: Agent2HoldingType): StockHoldingType => ({
+  id: holding.id,
+  ticker: holding.ticker,
+  entryPrice: holding.entryPrice,
+  holdShares: holding.holdShares,
+  goalShares: holding.goalShares,
+  currentPrice: holding.currentPrice,
+  lastUpdated: new Date()
+});
+
+const convertAgent1ToAgent2Formation = (formation: FormationType): Agent2FormationType => ({
+  id: formation.id.replace(/_/g, '-'), // ID形式をAgent2に合わせる
+  name: formation.name,
+  tiers: formation.tiers,
+  targetPercentages: formation.percentages,
+  description: `${formation.tiers}銘柄による配分: ${formation.percentages.join('-')}%`
+});
 
 // アクション関数の型定義
 interface AppActions {

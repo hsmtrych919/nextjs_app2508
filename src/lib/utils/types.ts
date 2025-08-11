@@ -202,12 +202,12 @@ export interface CloudflareEnv {
   DEBUG_MODE?: string;
 }
 
-// ティッカー定数型
+// ティッカー定数型 - Agent 1のSATELLITE_TICKERSと統合
 export type TickerSymbol = 
-  | 'AMZN' | 'AVGO' | 'COIN' | 'META' | 'GOOGL' 
-  | 'MSFT' | 'NFLX' | 'NVDA' | 'ORCL' | 'PYPL'
-  | 'QCOM' | 'SHOP' | 'TSLA' | 'TSM' | 'UBER'
-  | 'V' | 'WMT' | 'AMD' | 'ADBE' | 'CRM' | 'INTC';
+  | 'AMZN' | 'AVGO' | 'COIN' | 'CRM' | 'CRWD' | 'GOOGL' 
+  | 'META' | 'MSFT' | 'NFLX' | 'NVDA' | 'ORCL' | 'PLTR'
+  | 'PYPL' | 'SHOP' | 'SNOW' | 'SQ' | 'TSLA' | 'UBER'
+  | 'V' | 'WDAY' | 'ZM';
 
 // フォーメーション定義定数
 export const FORMATIONS: FormationType[] = [
@@ -243,10 +243,10 @@ export const DEFAULT_BUDGET: Omit<BudgetType, 'id'> = {
 };
 
 export const TICKER_SYMBOLS: TickerSymbol[] = [
-  'AMZN', 'AVGO', 'COIN', 'META', 'GOOGL',
-  'MSFT', 'NFLX', 'NVDA', 'ORCL', 'PYPL',
-  'QCOM', 'SHOP', 'TSLA', 'TSM', 'UBER',
-  'V', 'WMT', 'AMD', 'ADBE', 'CRM', 'INTC'
+  'AMZN', 'AVGO', 'COIN', 'CRM', 'CRWD', 'GOOGL',
+  'META', 'MSFT', 'NFLX', 'NVDA', 'ORCL', 'PLTR',
+  'PYPL', 'SHOP', 'SNOW', 'SQ', 'TSLA', 'UBER',
+  'V', 'WDAY', 'ZM'
 ];
 
 // === ユーティリティ関数型定義 ===

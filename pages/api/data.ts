@@ -111,6 +111,7 @@ export default async function handler(
       
       const response: ApiDataResponse = {
         success: true,
+        timestamp: new Date().toISOString(),
         data: {
           budget: data.budget || {
             id: 'default-budget',
@@ -140,7 +141,11 @@ export default async function handler(
       if (!req.body || typeof req.body !== 'object') {
         return res.status(400).json({
           success: false,
-          error: 'Invalid request body. Expected JSON object.'
+          timestamp: new Date().toISOString(),
+          error: {
+            code: 'INVALID_REQUEST_BODY',
+            message: 'Invalid request body. Expected JSON object.'
+          }
         });
       }
 
@@ -186,6 +191,7 @@ export default async function handler(
 
       const response: ApiDataResponse = {
         success: true,
+        timestamp: new Date().toISOString(),
         data: {
           budget: updatedBudget || data.budget || {
             id: 'default-budget',
@@ -214,8 +220,12 @@ export default async function handler(
       // サポートされていないメソッド
       res.status(405).json({
         success: false,
-        error: `Method ${req.method} Not Allowed`
-      });
+        timestamp: new Date().toISOString(),
+        error: {
+          code: 'METHOD_NOT_ALLOWED',
+          message: `Method ${req.method} Not Allowed`
+        }
+      } as ApiDataResponse);
     }
     
   } catch (error) {
@@ -225,7 +235,11 @@ export default async function handler(
     if (process.env.NODE_ENV === 'development') {
       return res.status(500).json({
         success: false,
-        error: `Development error: ${error instanceof Error ? error.message : 'Unknown error occurred'}`
+        timestamp: new Date().toISOString(),
+        error: {
+          code: 'DEVELOPMENT_ERROR',
+          message: `Development error: ${error instanceof Error ? error.message : 'Unknown error occurred'}`
+        }
       } as ApiDataResponse);
     }
     
@@ -235,8 +249,12 @@ export default async function handler(
     
     res.status(500).json({
       success: false,
-      error: 'Internal server error occurred'
-    });
+      timestamp: new Date().toISOString(),
+      error: {
+        code: 'INTERNAL_SERVER_ERROR',
+        message: 'Internal server error occurred'
+      }
+    } as ApiDataResponse);
   }
 }
 
