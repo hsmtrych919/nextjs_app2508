@@ -154,6 +154,66 @@ export const calculateAnnualReturn = (initialAmount: number, currentAmount: numb
 };
 
 /**
+ * 投資開始日からの経過期間に基づいて年利％を自動計算する
+ * @param holdShares 保有株数
+ * @param entryPrice エントリー価格
+ * @param currentPrice 現在価格
+ * @param entryDate 投資開始日
+ * @param currentDate 現在日（省略時は現在時刻）
+ * @returns 年利％
+ */
+export const calculateAutoAnnualReturn = (
+  holdShares: number, 
+  entryPrice: number, 
+  currentPrice: number, 
+  entryDate: Date, 
+  currentDate: Date = new Date()
+): number => {
+  const initialAmount = calculateInvestmentAmount(holdShares, entryPrice);
+  const currentAmount = calculateCurrentValue(holdShares, currentPrice);
+  
+  // 経過年数を計算（日数ベース）
+  const timeDiff = currentDate.getTime() - entryDate.getTime();
+  const daysDiff = timeDiff / (1000 * 3600 * 24);
+  const years = daysDiff / 365.25; // うるう年考慮
+  
+  return calculateAnnualReturn(initialAmount, currentAmount, years);
+};
+
+/**
+ * ポートフォリオ全体の年利％を自動計算する
+ * @param tiers 全Tierデータ
+ * @param startDate 投資開始日
+ * @param currentDate 現在日（省略時は現在時刻）
+ * @returns ポートフォリオ全体の年利％
+ */
+export const calculatePortfolioAutoAnnualReturn = (
+  tiers: TierType[], 
+  startDate: Date, 
+  currentDate: Date = new Date()
+): number => {
+  const totalInitialAmount = tiers.reduce((sum, tier) => {
+    return sum + tier.stocks.reduce((tierSum, stock) => {
+      return tierSum + calculateInvestmentAmount(stock.holdShares, stock.entryPrice);
+    }, 0);
+  }, 0);
+  
+  const totalCurrentAmount = tiers.reduce((sum, tier) => {
+    return sum + tier.stocks.reduce((tierSum, stock) => {
+      const currentPrice = stock.currentPrice || stock.entryPrice;
+      return tierSum + calculateCurrentValue(stock.holdShares, currentPrice);
+    }, 0);
+  }, 0);
+  
+  // 経過年数を計算
+  const timeDiff = currentDate.getTime() - startDate.getTime();
+  const daysDiff = timeDiff / (1000 * 3600 * 24);
+  const years = daysDiff / 365.25;
+  
+  return calculateAnnualReturn(totalInitialAmount, totalCurrentAmount, years);
+};
+
+/**
  * リターン率を計算する
  * @param profit 利益
  * @param startAmount 開始元本
