@@ -58,68 +58,81 @@ class MockCronService {
   }
 }
 
-// フォーメーション変更を検知する関数
+// フォーメーション変更を検知する関数（DatabaseServiceの新メソッドを使用）
 async function checkFormationChange(dbService: any): Promise<{
   hasChanged: boolean;
   currentFormationId: string;
   lastCheckDate: string;
+  previousFormation?: string | null;
 }> {
-  const settings = await dbService.getSettings();
-  
-  if (!settings) {
-    // 初回実行時は変更なしとして扱う
+  // MockCronServiceの場合は既存のロジックを使用
+  if (dbService instanceof MockCronService) {
+    const settings = await dbService.getSettings();
+    
+    if (!settings) {
+      return {
+        hasChanged: false,
+        currentFormationId: 'formation-3-50-30-20',
+        lastCheckDate: new Date().toISOString()
+      };
+    }
+
+    const now = new Date();
+    const lastCheck = new Date(settings.lastCheckDate);
+    const daysSinceLastCheck = Math.floor((now.getTime() - lastCheck.getTime()) / (1000 * 60 * 60 * 24));
+
     return {
-      hasChanged: false,
-      currentFormationId: 'formation-3-50-30-20',
-      lastCheckDate: new Date().toISOString()
+      hasChanged: daysSinceLastCheck >= 1,
+      currentFormationId: settings.currentFormationId,
+      lastCheckDate: settings.lastCheckDate
     };
   }
 
-  const now = new Date();
-  const lastCheck = new Date(settings.lastCheckDate);
-  const daysSinceLastCheck = Math.floor((now.getTime() - lastCheck.getTime()) / (1000 * 60 * 60 * 24));
+  // 本番環境：DatabaseServiceの新しいメソッドを使用
+  try {
+    const changeResult = await dbService.checkFormationChangeAndUpdate();
+    return {
+      hasChanged: changeResult.hasChanged,
+      currentFormationId: changeResult.currentFormation,
+      lastCheckDate: new Date().toISOString(),
+      previousFormation: changeResult.previousFormation
+    };
+  } catch (error) {
+    console.error('Error in formation change detection:', error);
+    // フォールバック：設定から情報を取得
+    const settings = await dbService.getSettings();
+    if (!settings) {
+      throw error;
+    }
 
-  // 前日から変更があったかどうか（簡単な実装）
-  // 実際のプロダクションでは、より精密な変更検知が必要
-  const hasChanged = daysSinceLastCheck >= 1;
-
-  return {
-    hasChanged,
-    currentFormationId: settings.currentFormationId,
-    lastCheckDate: settings.lastCheckDate
-  };
+    return {
+      hasChanged: false,
+      currentFormationId: settings.currentFormationId,
+      lastCheckDate: settings.lastCheckDate
+    };
+  }
 }
 
 // フォーメーション使用統計を更新する関数
 async function updateFormationUsageStats(
   dbService: any, 
-  currentFormationId: string
+  currentFormationId: string,
+  hasChanged: boolean
 ): Promise<FormationUsageType[]> {
   try {
-    // 現在のフォーメーションの使用統計を更新
-    const updatedUsage = await dbService.upsertFormationUsage(currentFormationId);
-    
-    // 他のフォーメーションの総日数も増加させる
-    const allUsageStats = await dbService.getFormationUsage();
-    const updatedStats: FormationUsageType[] = [];
-
-    for (const stat of allUsageStats) {
-      if (stat.formationId !== currentFormationId) {
-        // 現在のフォーメーション以外は総日数のみ増加
-        const updated = {
-          ...stat,
-          totalDays: stat.totalDays + 1,
-          usagePercentage: (stat.usageCount / (stat.totalDays + 1)) * 100
-        };
-        
-        // データベースを更新（簡略実装）
-        updatedStats.push(updated);
-      } else {
-        updatedStats.push(updatedUsage);
-      }
+    // MockCronService用の従来ロジック
+    if (dbService instanceof MockCronService) {
+      const updatedUsage = await dbService.upsertFormationUsage(currentFormationId);
+      return [updatedUsage];
     }
 
-    return updatedStats;
+    // DatabaseServiceの場合：checkFormationChangeAndUpdateで既に更新済み
+    if (!hasChanged) {
+      return await dbService.getFormationUsage();
+    }
+
+    // 本番環境：変更検知と更新が既に完了しているため、最新の統計を取得
+    return await dbService.getFormationUsage();
   } catch (error) {
     console.error('Error updating formation usage stats:', error);
     return [];
@@ -164,7 +177,8 @@ export default async function handler(
     // フォーメーション使用統計を更新
     const updatedStats = await updateFormationUsageStats(
       dbService, 
-      changeCheck.currentFormationId
+      changeCheck.currentFormationId,
+      changeCheck.hasChanged
     );
 
     // 最終チェック日時を更新
@@ -228,10 +242,7 @@ export async function scheduled(event: any, env: CloudflareEnv, ctx: any) {
     const changeCheck = await checkFormationChange(dbService);
     
     if (changeCheck.hasChanged) {
-      await updateFormationUsageStats(dbService, changeCheck.currentFormationId);
-      await dbService.upsertSettings({
-        lastCheckDate: new Date().toISOString()
-      });
+      await updateFormationUsageStats(dbService, changeCheck.currentFormationId, changeCheck.hasChanged);
       
       console.log(`Formation usage updated for: ${changeCheck.currentFormationId}`);
     } else {
