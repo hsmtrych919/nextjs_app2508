@@ -1,7 +1,8 @@
 // サテライト投資管理アプリ - 自動チェック（Cron）API
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createDatabaseService, handleDatabaseError } from '../../src/lib/utils/database';
-import { FORMATIONS } from '../../src/lib/utils/types';
+import { sendErrorResponse } from '../../src/lib/utils/api-error-handler';
+import { FORMATIONS, API_ERROR_CODES } from '../../src/lib/utils/types';
 import type { 
   ApiCronResponse, 
   CloudflareEnv,
@@ -143,6 +144,9 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<ApiCronResponse>
 ) {
+  const startTime = Date.now();
+  const requestId = req.headers['x-request-id'] as string || `cron-${Date.now()}`;
+
   try {
     // POSTメソッドのみ許可
     if (req.method !== 'POST') {
@@ -150,8 +154,8 @@ export default async function handler(
         success: false,
         timestamp: new Date().toISOString(),
         error: {
-          code: 'METHOD_NOT_ALLOWED',
-          message: `Method ${req.method} Not Allowed`
+          code: API_ERROR_CODES.METHOD_NOT_ALLOWED,
+          message: `HTTPメソッド ${req.method} は許可されていません`
         }
       });
     }
@@ -163,11 +167,12 @@ export default async function handler(
     const changeCheck = await checkFormationChange(dbService);
 
     if (!changeCheck.hasChanged) {
+      console.log(`[${requestId}] No changes detected in ${Date.now() - startTime}ms`);
       return res.status(200).json({
         success: true,
         timestamp: new Date().toISOString(),
         data: {
-          message: 'No changes detected since last check',
+          message: '前回のチェック以降、変更は検出されませんでした',
           changesDetected: false,
           processedFormations: []
         }
@@ -186,11 +191,12 @@ export default async function handler(
       lastCheckDate: new Date().toISOString()
     });
 
+    console.log(`[${requestId}] Cron job completed in ${Date.now() - startTime}ms`);
     res.status(200).json({
       success: true,
       timestamp: new Date().toISOString(),
       data: {
-        message: `Formation usage statistics updated for ${changeCheck.currentFormationId}`,
+        message: `フォーメーション使用統計を更新しました: ${changeCheck.currentFormationId}`,
         changesDetected: true,
         processedFormations: [changeCheck.currentFormationId],
         updatedUsage: updatedStats
@@ -198,31 +204,10 @@ export default async function handler(
     });
 
   } catch (error) {
-    console.error('Cron API Error:', error);
-    
-    // 開発環境では詳細なエラー情報を返す
-    if (process.env.NODE_ENV === 'development') {
-      return res.status(500).json({
-        success: false,
-        timestamp: new Date().toISOString(),
-        error: {
-          code: 'DEVELOPMENT_ERROR',
-          message: `Development error: ${error instanceof Error ? error.message : 'Unknown error'}`
-        }
-      });
-    }
-    
-    // 本番環境では安全なエラーメッセージ
-    const envVar = getCloudflareEnv();
-    const dbError = envVar ? handleDatabaseError(error) : new Error('Development error');
-    
-    res.status(500).json({
-      success: false,
-      timestamp: new Date().toISOString(),
-      error: {
-        code: 'CRON_EXECUTION_ERROR',
-        message: 'Cron job execution failed'
-      }
+    // 統一されたエラーハンドリング関数を使用
+    sendErrorResponse(res, error, {
+      requestId,
+      processingTime: Date.now() - startTime
     });
   }
 }

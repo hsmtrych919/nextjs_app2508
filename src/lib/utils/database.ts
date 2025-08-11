@@ -482,9 +482,38 @@ export function createDatabaseService(env: CloudflareEnv): DatabaseService {
 
 // エラーハンドリング用
 export class DatabaseError extends Error {
-  constructor(message: string, public cause?: Error) {
+  public readonly errorType: 'CONNECTION' | 'TIMEOUT' | 'AUTHENTICATION' | 'QUERY' | 'CONSTRAINT' | 'UNKNOWN';
+  
+  constructor(message: string, public cause?: Error, errorType: DatabaseError['errorType'] = 'UNKNOWN') {
     super(message);
     this.name = 'DatabaseError';
+    this.errorType = errorType;
+  }
+  
+  static fromError(error: Error): DatabaseError {
+    const message = error.message.toLowerCase();
+    
+    if (message.includes('timeout') || message.includes('timed out')) {
+      return new DatabaseError('データベース接続がタイムアウトしました', error, 'TIMEOUT');
+    }
+    
+    if (message.includes('connection') || message.includes('connect')) {
+      return new DatabaseError('データベースへの接続に失敗しました', error, 'CONNECTION');
+    }
+    
+    if (message.includes('auth') || message.includes('credential') || message.includes('permission')) {
+      return new DatabaseError('データベース認証に失敗しました', error, 'AUTHENTICATION');
+    }
+    
+    if (message.includes('constraint') || message.includes('duplicate') || message.includes('foreign key')) {
+      return new DatabaseError('データベース制約違反が発生しました', error, 'CONSTRAINT');
+    }
+    
+    if (message.includes('query') || message.includes('syntax') || message.includes('sql')) {
+      return new DatabaseError('データベースクエリの実行に失敗しました', error, 'QUERY');
+    }
+    
+    return new DatabaseError(`データベースエラーが発生しました: ${error.message}`, error, 'UNKNOWN');
   }
 }
 
@@ -494,8 +523,8 @@ export function handleDatabaseError(error: unknown): DatabaseError {
   }
   
   if (error instanceof Error) {
-    return new DatabaseError(`Database operation failed: ${error.message}`, error);
+    return DatabaseError.fromError(error);
   }
   
-  return new DatabaseError('Unknown database error occurred');
+  return new DatabaseError('不明なデータベースエラーが発生しました', undefined, 'UNKNOWN');
 }

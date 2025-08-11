@@ -36,7 +36,7 @@ function validateApiDataRequest(data: unknown): { valid: boolean; error?: string
   if (!data || typeof data !== 'object') {
     return { 
       valid: false, 
-      error: 'Request body must be a valid JSON object',
+      error: 'リクエストボディは有効なJSONオブジェクトである必要があります',
       errorCode: API_ERROR_CODES.VALIDATION_ERROR
     };
   }
@@ -49,21 +49,21 @@ function validateApiDataRequest(data: unknown): { valid: boolean; error?: string
     if (funds !== undefined && (typeof funds !== 'number' || funds < 0)) {
       return { 
         valid: false, 
-        error: 'Budget funds must be a positive number',
+        error: '予算の資金は0以上の数値である必要があります',
         errorCode: API_ERROR_CODES.VALIDATION_ERROR
       };
     }
     if (start !== undefined && (typeof start !== 'number' || start < 0)) {
       return { 
         valid: false, 
-        error: 'Budget start must be a positive number',
+        error: '予算の開始金額は0以上の数値である必要があります',
         errorCode: API_ERROR_CODES.VALIDATION_ERROR
       };
     }
     if (profit !== undefined && typeof profit !== 'number') {
       return { 
         valid: false, 
-        error: 'Budget profit must be a number',
+        error: '予算の利益は数値である必要があります',
         errorCode: API_ERROR_CODES.VALIDATION_ERROR
       };
     }
@@ -71,11 +71,12 @@ function validateApiDataRequest(data: unknown): { valid: boolean; error?: string
 
   // 保有銘柄バリデーション
   if (request.holdings && Array.isArray(request.holdings)) {
-    for (const holding of request.holdings) {
+    for (let index = 0; index < request.holdings.length; index++) {
+      const holding = request.holdings[index];
       if (!holding.id || !holding.ticker || typeof holding.tier !== 'number') {
         return { 
           valid: false, 
-          error: 'Each holding must have id, ticker, and tier',
+          error: `保有銘柄[${index}]: ID、ティッカーシンボル、階層が必要です`,
           errorCode: API_ERROR_CODES.VALIDATION_ERROR
         };
       }
@@ -83,7 +84,7 @@ function validateApiDataRequest(data: unknown): { valid: boolean; error?: string
       if (!TICKER_SYMBOLS.includes(holding.ticker as TickerSymbol)) {
         return { 
           valid: false, 
-          error: `Invalid ticker symbol: ${holding.ticker}`,
+          error: `保有銘柄[${index}]: 無効なティッカーシンボル: ${holding.ticker}`,
           errorCode: API_ERROR_CODES.VALIDATION_ERROR
         };
       }
@@ -91,7 +92,7 @@ function validateApiDataRequest(data: unknown): { valid: boolean; error?: string
       if (holding.tier < 1 || holding.tier > 5) {
         return { 
           valid: false, 
-          error: 'Tier must be between 1 and 5',
+          error: `保有銘柄[${index}]: 階層は1から5の間である必要があります`,
           errorCode: API_ERROR_CODES.VALIDATION_ERROR
         };
       }
@@ -99,7 +100,7 @@ function validateApiDataRequest(data: unknown): { valid: boolean; error?: string
       if (typeof holding.entryPrice !== 'number' || holding.entryPrice <= 0) {
         return { 
           valid: false, 
-          error: 'Entry price must be a positive number',
+          error: `保有銘柄[${index}]: 取得価格は正の数値である必要があります`,
           errorCode: API_ERROR_CODES.VALIDATION_ERROR
         };
       }
@@ -107,7 +108,7 @@ function validateApiDataRequest(data: unknown): { valid: boolean; error?: string
       if (typeof holding.holdShares !== 'number' || holding.holdShares < 0) {
         return { 
           valid: false, 
-          error: 'Hold shares must be a non-negative number',
+          error: `保有銘柄[${index}]: 保有株数は0以上の数値である必要があります`,
           errorCode: API_ERROR_CODES.VALIDATION_ERROR
         };
       }
@@ -115,7 +116,7 @@ function validateApiDataRequest(data: unknown): { valid: boolean; error?: string
       if (typeof holding.goalShares !== 'number' || holding.goalShares <= 0) {
         return { 
           valid: false, 
-          error: 'Goal shares must be a positive number',
+          error: `保有銘柄[${index}]: 目標株数は正の数値である必要があります`,
           errorCode: API_ERROR_CODES.VALIDATION_ERROR
         };
       }
@@ -128,7 +129,7 @@ function validateApiDataRequest(data: unknown): { valid: boolean; error?: string
     if (!validFormations.includes(request.formationId)) {
       return { 
         valid: false, 
-        error: `Invalid formation ID: ${request.formationId}`,
+        error: `無効なフォーメーションID: ${request.formationId}`,
         errorCode: API_ERROR_CODES.INVALID_FORMATION
       };
     }
@@ -287,7 +288,7 @@ export default async function handler(
           timestamp: new Date().toISOString(),
           error: {
             code: validation.errorCode || API_ERROR_CODES.VALIDATION_ERROR,
-            message: validation.error || 'Invalid request data'
+            message: validation.error || '無効なリクエストデータです'
           }
         });
       }
@@ -393,7 +394,7 @@ export default async function handler(
         timestamp: new Date().toISOString(),
         error: {
           code: API_ERROR_CODES.METHOD_NOT_ALLOWED,
-          message: `HTTP method ${req.method} is not allowed for this endpoint`
+          message: `HTTPメソッド ${req.method} はこのエンドポイントで許可されていません`
         }
       });
     }
@@ -403,17 +404,17 @@ export default async function handler(
     console.error(`[${requestId}] API Error:`, error);
     
     let errorCode: ApiErrorCode = API_ERROR_CODES.INTERNAL_ERROR;
-    let errorMessage = 'Internal server error occurred';
+    let errorMessage = '内部サーバーエラーが発生しました';
     let statusCode = 500;
 
     if (error instanceof DatabaseError) {
       errorCode = API_ERROR_CODES.DATABASE_ERROR;
-      errorMessage = 'Database operation failed';
+      errorMessage = 'データベース操作に失敗しました';
     }
 
     // 開発環境では詳細なエラー情報を提供
     if (process.env.NODE_ENV === 'development') {
-      errorMessage = `Development error: ${error instanceof Error ? error.message : 'Unknown error'}`;
+      errorMessage = `開発環境エラー: ${error instanceof Error ? error.message : '不明なエラー'}`;
     }
     
     res.status(statusCode).json({
@@ -453,7 +454,7 @@ export async function onRequestGet(context: any) {
         'x-request-id': `cf-get-${Date.now()}`
       },
       body: null
-    } as NextApiRequest;
+    } as Partial<NextApiRequest> & { method: string; };
 
     let responseData: ApiDataResponse;
     let statusCode = 200;
@@ -474,9 +475,9 @@ export async function onRequestGet(context: any) {
           });
         }
       })
-    } as NextApiResponse<ApiDataResponse>;
+    } as any;
 
-    await handler(mockReq, mockRes);
+    await handler(mockReq as any, mockRes);
     
     return new Response(JSON.stringify(responseData!), {
       status: statusCode,
@@ -535,7 +536,7 @@ export async function onRequestPost(context: any) {
         'x-request-id': `cf-post-${Date.now()}`
       },
       body
-    } as NextApiRequest;
+    } as Partial<NextApiRequest> & { method: string; body: any; };
 
     let responseData: ApiDataResponse;
     let statusCode = 200;
@@ -556,9 +557,9 @@ export async function onRequestPost(context: any) {
           });
         }
       })
-    } as NextApiResponse<ApiDataResponse>;
+    } as any;
 
-    await handler(mockReq, mockRes);
+    await handler(mockReq as any, mockRes);
     
     return new Response(JSON.stringify(responseData!), {
       status: statusCode,
