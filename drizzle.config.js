@@ -1,7 +1,7 @@
 // サテライト投資管理アプリ - Drizzle Kit 設定ファイル
-import type { Config } from 'drizzle-kit';
+const { defineConfig } = require('drizzle-kit');
 
-export default {
+module.exports = defineConfig({
   schema: './src/lib/utils/schema.ts',
   out: './db/migrations',
   dialect: 'sqlite',
@@ -15,4 +15,4 @@ export default {
   },
   verbose: true,
   strict: true,
-} satisfies Config;
+});
