@@ -1,5 +1,5 @@
-// サテライト投資管理アプリ - Drizzle ORM スキーマ定義
-import { sqliteTable, text, integer, real } from 'drizzle-orm/sqlite-core';
+// サテライト投資管理アプリ - Drizzle ORM スキーマ定義（パフォーマンス最適化版）
+import { sqliteTable, text, integer, real, index } from 'drizzle-orm/sqlite-core';
 
 // 設定テーブル（アプリ全体の設定管理）
 export const settings = sqliteTable('settings', {
@@ -68,7 +68,17 @@ export type NewFormationUsage = typeof formationUsage.$inferInsert;
 export type FormationHistory = typeof formationHistory.$inferSelect;
 export type NewFormationHistory = typeof formationHistory.$inferInsert;
 
-// インデックス定義
-export const holdingsTickerIndex = 'holdings_ticker_idx';
-export const formationUsageFormationIdIndex = 'formation_usage_formation_id_idx';
-export const formationHistoryToFormationIndex = 'formation_history_to_formation_idx';
+// パフォーマンス最適化のためのインデックス定義
+export const holdingsTickerIndex = index('holdings_ticker_idx').on(holdings.ticker);
+export const holdingsTierIndex = index('holdings_tier_idx').on(holdings.tier);
+export const holdingsCompoundIndex = index('holdings_ticker_tier_idx').on(holdings.ticker, holdings.tier);
+
+export const formationUsageFormationIdIndex = index('formation_usage_formation_id_idx').on(formationUsage.formationId);
+export const formationUsageTotalDaysIndex = index('formation_usage_total_days_idx').on(formationUsage.totalDays);
+export const formationUsageCompoundIndex = index('formation_usage_compound_idx').on(formationUsage.formationId, formationUsage.totalDays);
+
+export const formationHistoryToFormationIndex = index('formation_history_to_formation_idx').on(formationHistory.toFormationId);
+export const formationHistoryChangedAtIndex = index('formation_history_changed_at_idx').on(formationHistory.changedAt);
+
+export const settingsUpdatedAtIndex = index('settings_updated_at_idx').on(settings.updatedAt);
+export const budgetUpdatedAtIndex = index('budget_updated_at_idx').on(budget.updatedAt);

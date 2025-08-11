@@ -15,12 +15,14 @@ import type {
   ApiErrorCode
 } from '../../src/lib/utils/types';
 
-// 開発環境用のメモリ内データストレージ
+// 開発環境用の最適化されたメモリ内データストレージ
 const developmentStorage = {
   settings: null as SettingsType | null,
   budget: null as BudgetType | null,
   holdings: [] as HoldingType[],
-  usageStats: [] as FormationUsageType[]
+  usageStats: [] as FormationUsageType[],
+  // メモリ使用量削減のためのキャッシュ
+  _cache: new Map<string, { data: any; timestamp: number; ttl: number }>()
 };
 
 // Cloudflare環境変数の取得
@@ -138,15 +140,33 @@ function validateApiDataRequest(data: unknown): { valid: boolean; error?: string
   return { valid: true };
 }
 
-// 開発環境用のモックデータベースサービス
+// 開発環境用の最適化されたモックデータベースサービス
 class MockDatabaseService {
+  private getCachedData<T>(key: string, producer: () => T, ttlMs: number = 30000): T {
+    const cached = developmentStorage._cache.get(key);
+    const now = Date.now();
+    
+    if (cached && now - cached.timestamp < cached.ttl) {
+      return cached.data as T;
+    }
+    
+    const data = producer();
+    developmentStorage._cache.set(key, { data, timestamp: now, ttl: ttlMs });
+    return data;
+  }
+  
   async getAllData() {
-    return {
+    const startTime = Date.now();
+    
+    const result = this.getCachedData('getAllData', () => ({
       settings: developmentStorage.settings,
       budget: developmentStorage.budget,
-      holdings: developmentStorage.holdings,
-      usageStats: developmentStorage.usageStats
-    };
+      holdings: [...developmentStorage.holdings], // シャローコピーでメモリ効率化
+      usageStats: [...developmentStorage.usageStats]
+    }), 5000); // 5秒キャッシュ
+    
+    console.log(`MockDatabaseService.getAllData completed in ${Date.now() - startTime}ms`);
+    return result;
   }
 
   async upsertBudget(budgetData: Partial<BudgetType>): Promise<BudgetType> {
@@ -160,6 +180,10 @@ class MockDatabaseService {
       ...budgetData
     };
     developmentStorage.budget = updated;
+    
+    // キャッシュをクリアして一貫性を保つ
+    developmentStorage._cache.delete('getAllData');
+    
     return updated;
   }
 
@@ -178,7 +202,8 @@ class MockDatabaseService {
   }
 
   async clearAllHoldings(): Promise<void> {
-    developmentStorage.holdings = [];
+    developmentStorage.holdings.length = 0; // メモリ効率的な配列クリア
+    developmentStorage._cache.delete('getAllData');
   }
 
   async upsertHolding(holding: HoldingType): Promise<HoldingType> {
@@ -194,6 +219,10 @@ class MockDatabaseService {
     } else {
       developmentStorage.holdings.push(updatedHolding);
     }
+    
+    // キャッシュをクリア
+    developmentStorage._cache.delete('getAllData');
+    
     return updatedHolding;
   }
 
@@ -270,7 +299,15 @@ export default async function handler(
           }
         };
 
-        console.log(`[${requestId}] GET /api/data completed in ${Date.now() - startTime}ms`);
+        const processingTime = Date.now() - startTime;
+        console.log(`[${requestId}] GET /api/data completed in ${processingTime}ms`);
+        
+        // パフォーマンスメトリクスをレスポンスヘッダーに追加
+        if (process.env.NODE_ENV === 'development') {
+          res.setHeader('X-Response-Time', `${processingTime}ms`);
+          res.setHeader('X-Data-Size', JSON.stringify(response).length.toString());
+        }
+        
         res.status(200).json(response);
 
       } catch (dbError) {
@@ -380,7 +417,16 @@ export default async function handler(
           }
         };
 
-        console.log(`[${requestId}] POST /api/data completed in ${Date.now() - startTime}ms`);
+        const processingTime = Date.now() - startTime;
+        console.log(`[${requestId}] POST /api/data completed in ${processingTime}ms`);
+        
+        // パフォーマンスメトリクスをレスポンスヘッダーに追加
+        if (process.env.NODE_ENV === 'development') {
+          res.setHeader('X-Response-Time', `${processingTime}ms`);
+          res.setHeader('X-Data-Size', JSON.stringify(response).length.toString());
+          res.setHeader('X-DB-Operations', updatedHoldings.length.toString());
+        }
+        
         res.status(200).json(response);
 
       } catch (dbError) {

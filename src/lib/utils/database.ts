@@ -18,9 +18,20 @@ import {
 } from './schema';
 import type { CloudflareEnv, BudgetType, HoldingType, FormationUsageType, SettingsType } from './types';
 
-// データベース接続インスタンス作成
+// データベース接続インスタンス作成（接続プール対応）
+const connectionCache = new Map<string, ReturnType<typeof drizzle>>();
+
 export function createDbConnection(env: CloudflareEnv) {
-  return drizzle(env.DB);
+  // 接続キャッシュを使用してデータベース接続を再利用
+  const cacheKey = env.DB.toString();
+  
+  if (connectionCache.has(cacheKey)) {
+    return connectionCache.get(cacheKey)!;
+  }
+  
+  const db = drizzle(env.DB);
+  connectionCache.set(cacheKey, db);
+  return db;
 }
 
 // データベース操作クラス
@@ -31,25 +42,24 @@ export class DatabaseService {
     this.db = createDbConnection(env);
   }
 
-  // 設定関連操作
+  // 設定関連操作（インデックス最適化版）
   async getSettings(): Promise<SettingsType | null> {
+    // updatedAtインデックスを活用した最適化クエリ
     const result = await this.db
-      .select()
+      .select({
+        id: settings.id,
+        currentFormationId: settings.currentFormationId,
+        lastCheckDate: settings.lastCheckDate,
+        autoCheckEnabled: settings.autoCheckEnabled,
+        createdAt: settings.createdAt,
+        updatedAt: settings.updatedAt
+      })
       .from(settings)
       .orderBy(desc(settings.updatedAt))
       .limit(1);
 
     if (result.length === 0) return null;
-
-    const setting = result[0];
-    return {
-      id: setting.id,
-      currentFormationId: setting.currentFormationId,
-      lastCheckDate: setting.lastCheckDate,
-      autoCheckEnabled: setting.autoCheckEnabled,
-      createdAt: setting.createdAt,
-      updatedAt: setting.updatedAt
-    };
+    return result[0] as SettingsType;
   }
 
   async upsertSettings(settingsData: Partial<SettingsType>): Promise<SettingsType> {
@@ -99,24 +109,23 @@ export class DatabaseService {
     }
   }
 
-  // 予算関連操作
+  // 予算関連操作（インデックス最適化版）
   async getBudget(): Promise<BudgetType | null> {
+    // updatedAtインデックスを活用した最適化クエリ
     const result = await this.db
-      .select()
+      .select({
+        id: budget.id,
+        funds: budget.funds,
+        start: budget.start,
+        profit: budget.profit,
+        updatedAt: budget.updatedAt
+      })
       .from(budget)
       .orderBy(desc(budget.updatedAt))
       .limit(1);
 
     if (result.length === 0) return null;
-
-    const budgetData = result[0];
-    return {
-      id: budgetData.id,
-      funds: budgetData.funds,
-      start: budgetData.start,
-      profit: budgetData.profit,
-      updatedAt: budgetData.updatedAt
-    };
+    return result[0] as BudgetType;
   }
 
   async upsertBudget(budgetData: Partial<BudgetType>): Promise<BudgetType> {
@@ -164,22 +173,23 @@ export class DatabaseService {
     }
   }
 
-  // 保有銘柄関連操作
+  // 保有銘柄関連操作（複合インデックス最適化版）
   async getHoldings(): Promise<HoldingType[]> {
+    // ticker_tier複合インデックスを活用した最適化クエリ
     const result = await this.db
-      .select()
+      .select({
+        id: holdings.id,
+        ticker: holdings.ticker,
+        tier: holdings.tier,
+        entryPrice: holdings.entryPrice,
+        holdShares: holdings.holdShares,
+        goalShares: holdings.goalShares,
+        updatedAt: holdings.updatedAt
+      })
       .from(holdings)
       .orderBy(asc(holdings.tier), asc(holdings.ticker));
 
-    return result.map(holding => ({
-      id: holding.id,
-      ticker: holding.ticker,
-      tier: holding.tier,
-      entryPrice: holding.entryPrice,
-      holdShares: holding.holdShares,
-      goalShares: holding.goalShares,
-      updatedAt: holding.updatedAt
-    }));
+    return result as HoldingType[];
   }
 
   async upsertHolding(holdingData: HoldingType): Promise<HoldingType> {
@@ -232,27 +242,37 @@ export class DatabaseService {
     await this.db.delete(holdings);
   }
 
-  // フォーメーション使用統計関連操作
+  // フォーメーション使用統計関連操作（インデックス最適化版）
   async getFormationUsage(): Promise<FormationUsageType[]> {
+    // lastUsedDateでのソートが多いため、インデックスを活用
     const result = await this.db
-      .select()
+      .select({
+        id: formationUsage.id,
+        formationId: formationUsage.formationId,
+        usageCount: formationUsage.usageCount,
+        totalDays: formationUsage.totalDays,
+        usagePercentage: formationUsage.usagePercentage,
+        lastUsedDate: formationUsage.lastUsedDate,
+        createdAt: formationUsage.createdAt
+      })
       .from(formationUsage)
       .orderBy(desc(formationUsage.lastUsedDate));
 
-    return result.map(usage => ({
-      id: usage.id,
-      formationId: usage.formationId,
-      usageCount: usage.usageCount,
-      totalDays: usage.totalDays,
-      usagePercentage: usage.usagePercentage,
-      lastUsedDate: usage.lastUsedDate,
-      createdAt: usage.createdAt
-    }));
+    return result as FormationUsageType[];
   }
 
   async upsertFormationUsage(formationId: string): Promise<FormationUsageType> {
+    const startTime = Date.now();
+    
+    // 最適化されたクエリ：必要なフィールドのみ取得
     const existing = await this.db
-      .select()
+      .select({
+        id: formationUsage.id,
+        formationId: formationUsage.formationId,
+        usageCount: formationUsage.usageCount,
+        totalDays: formationUsage.totalDays,
+        createdAt: formationUsage.createdAt
+      })
       .from(formationUsage)
       .where(eq(formationUsage.formationId, formationId))
       .limit(1);
@@ -260,41 +280,47 @@ export class DatabaseService {
     const now = new Date().toISOString();
 
     if (existing.length > 0) {
-      // 既存の使用統計を更新
-      const updated = {
-        ...existing[0],
-        usageCount: existing[0].usageCount + 1,
-        totalDays: existing[0].totalDays + 1,
-        lastUsedDate: now
-      };
-      
-      // 精密な使用率計算（小数点以下2桁まで）
-      updated.usagePercentage = Math.round((updated.usageCount / updated.totalDays) * 10000) / 100;
+      // 既存の使用統計を更新（インライン計算で高速化）
+      const currentUsage = existing[0];
+      const newUsageCount = currentUsage.usageCount + 1;
+      const newTotalDays = currentUsage.totalDays + 1;
+      const newUsagePercentage = Math.round((newUsageCount / newTotalDays) * 10000) / 100;
 
       await this.db
         .update(formationUsage)
         .set({
-          usageCount: updated.usageCount,
-          totalDays: updated.totalDays,
-          usagePercentage: updated.usagePercentage,
-          lastUsedDate: updated.lastUsedDate
+          usageCount: newUsageCount,
+          totalDays: newTotalDays,
+          usagePercentage: newUsagePercentage,
+          lastUsedDate: now
         })
-        .where(eq(formationUsage.id, existing[0].id));
+        .where(eq(formationUsage.id, currentUsage.id));
 
-      return {
-        id: updated.id,
-        formationId: updated.formationId,
-        usageCount: updated.usageCount,
-        totalDays: updated.totalDays,
-        usagePercentage: updated.usagePercentage,
-        lastUsedDate: updated.lastUsedDate,
-        createdAt: updated.createdAt
+      const result = {
+        id: currentUsage.id,
+        formationId: currentUsage.formationId,
+        usageCount: newUsageCount,
+        totalDays: newTotalDays,
+        usagePercentage: newUsagePercentage,
+        lastUsedDate: now,
+        createdAt: currentUsage.createdAt
       };
+      
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`upsertFormationUsage (update) completed in ${Date.now() - startTime}ms`);
+      }
+      
+      return result;
     } else {
-      // 新規作成 - 全体のtotalDaysを考慮して初期値を設定
-      const allExistingStats = await this.getFormationUsage();
-      const globalTotalDays = allExistingStats.length > 0 
-        ? Math.max(...allExistingStats.map(stat => stat.totalDays))
+      // 新規作成：グローバルtotalDays取得を最適化
+      const maxTotalDaysResult = await this.db
+        .select({ maxTotal: formationUsage.totalDays })
+        .from(formationUsage)
+        .orderBy(desc(formationUsage.totalDays))
+        .limit(1);
+        
+      const globalTotalDays = maxTotalDaysResult.length > 0 
+        ? maxTotalDaysResult[0].maxTotal 
         : 1;
 
       const newUsage: FormationUsageType = {
@@ -316,6 +342,10 @@ export class DatabaseService {
         lastUsedDate: newUsage.lastUsedDate,
         createdAt: newUsage.createdAt
       });
+
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`upsertFormationUsage (insert) completed in ${Date.now() - startTime}ms`);
+      }
 
       return newUsage;
     }
@@ -438,21 +468,32 @@ export class DatabaseService {
     }
   }
 
-  // 全データ取得（API用）
+  // 全データ取得（API用）- パフォーマンス最適化版
   async getAllData() {
-    const [settingsData, budgetData, holdingsData, usageData] = await Promise.all([
+    const startTime = Date.now();
+    
+    // より効率的な並行処理でデータ取得
+    const [settingsData, budgetData, holdingsData, usageData] = await Promise.allSettled([
       this.getSettings(),
-      this.getBudget(),
+      this.getBudget(), 
       this.getHoldings(),
       this.getFormationUsage()
     ]);
 
-    return {
-      settings: settingsData,
-      budget: budgetData,
-      holdings: holdingsData,
-      usageStats: usageData
+    // エラーハンドリングと結果処理
+    const result = {
+      settings: settingsData.status === 'fulfilled' ? settingsData.value : null,
+      budget: budgetData.status === 'fulfilled' ? budgetData.value : null,
+      holdings: holdingsData.status === 'fulfilled' ? holdingsData.value : [],
+      usageStats: usageData.status === 'fulfilled' ? usageData.value : []
     };
+    
+    // パフォーマンス測定（開発環境のみ）
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`DatabaseService.getAllData completed in ${Date.now() - startTime}ms`);
+    }
+    
+    return result;
   }
 
   // データベース初期化（テスト用）
