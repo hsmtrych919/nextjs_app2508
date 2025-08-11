@@ -3,7 +3,7 @@ import type { Config } from 'drizzle-kit';
 
 export default {
   schema: './src/lib/utils/schema.ts',
-  out: './.claude/tmp/migrations',
+  out: './db/migrations',
   dialect: 'sqlite',
   driver: 'd1-http',
   dbCredentials: {

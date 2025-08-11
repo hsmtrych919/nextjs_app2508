@@ -68,7 +68,7 @@ create_database() {
 run_migrations() {
     log_info "Running database migrations..."
     
-    local migration_file=".claude/tmp/migrations/0001_initial.sql"
+    local migration_file="db/migrations/0001_initial.sql"
     local db_name="satellite-investment-db"
     
     if [ ! -f "$migration_file" ]; then
@@ -88,7 +88,7 @@ setup_local_database() {
     log_info "Setting up local development database..."
     
     # ローカル開発用のD1データベース作成
-    wrangler d1 execute satellite-investment-db --local --file=".claude/tmp/migrations/0001_initial.sql"
+    wrangler d1 execute satellite-investment-db --local --file="db/migrations/0001_initial.sql"
     
     log_success "Local development database setup complete"
 }
