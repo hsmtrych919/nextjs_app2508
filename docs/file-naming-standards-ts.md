@@ -168,7 +168,7 @@ TypeScriptファイルの拡張子は、JSX（HTML要素）の有無によって
 - Step 2: constants から型比率を減らし runtime 値中心へ
 - Step 3: /src/lib/types/index.ts で export type ... に限定（副作用ゼロ）
 
-AI 禁止行為（再掲: 型配置関連）
+AI 禁止行為
 - [ ] /src/lib/types 作成提案
 - [ ] 型追加のみを理由に別フォルダ抽出提案
 - [ ] 未承認フォルダ(models, schemas, dto 等)の創出
