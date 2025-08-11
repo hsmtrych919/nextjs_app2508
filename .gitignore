@@ -8,3 +8,6 @@ _dist
 .serena/*
 !.serena/project.yml
 draft.jsx
+.env
+.env.local
+.env.*

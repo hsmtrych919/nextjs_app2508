@@ -14,7 +14,9 @@
     "db:status": "./scripts/manage-migrations.sh status-local",
     "db:reset": "./scripts/manage-migrations.sh reset-local",
     "deploy": "npm run build:deploy && wrangler pages deploy _dist",
-    "deploy:preview": "npm run build:deploy && wrangler pages deploy _dist --env=preview"
+    "deploy:preview": "npm run build:deploy && wrangler pages deploy _dist --env=preview",
+    "deploy:prod": "npm run build:deploy && wrangler pages deploy _dist --env=production",
+    "deploy:staging": "npm run build:deploy && wrangler pages deploy _dist --env=preview"
   },
   "browserslist": {
     "development": [

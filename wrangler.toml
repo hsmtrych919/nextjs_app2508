@@ -19,10 +19,10 @@ database_name = "satellite-investment-db"
 database_id = "your-database-id-here" # wrangler d1 create で取得したIDを設定
 
 # 本番用D1設定（別データベース）
-# [[env.production.d1_databases]]
-# binding = "DB"
-# database_name = "satellite-investment-db-prod"
-# database_id = "your-prod-database-id-here"
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "satellite-investment-db-prod"
+database_id = "your-prod-database-id-here"  # 実際のデプロイ時に更新が必要
 
 # Cron Triggers設定
 [[triggers.crons]]
