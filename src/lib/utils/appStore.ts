@@ -16,35 +16,30 @@ import type {
   FormationType as Agent2FormationType,
   FORMATIONS
 } from './types';
+// APIクライアント
+import { 
+  fetchAllData, 
+  saveAllData, 
+  saveBudget, 
+  saveHoldings, 
+  saveFormation,
+  ApiError,
+  isApiError,
+  getErrorMessage,
+  logApiError 
+} from './api-client';
 
-// Agent1⇔Agent2 型変換ユーティリティ
-const convertAgent1ToAgent2Holding = (stock: StockHoldingType): Agent2HoldingType => ({
-  id: stock.id,
-  ticker: stock.ticker,
-  tier: 1, // デフォルト値、実際の使用時に適切に設定
-  entryPrice: stock.entryPrice,
-  holdShares: stock.holdShares,
-  goalShares: stock.goalShares,
-  updatedAt: new Date().toISOString()
-});
-
-const convertAgent2ToAgent1Holding = (holding: Agent2HoldingType): StockHoldingType => ({
-  id: holding.id,
-  ticker: holding.ticker,
-  entryPrice: holding.entryPrice,
-  holdShares: holding.holdShares,
-  goalShares: holding.goalShares,
-  currentPrice: holding.currentPrice,
-  lastUpdated: new Date()
-});
-
-const convertAgent1ToAgent2Formation = (formation: FormationType): Agent2FormationType => ({
-  id: formation.id.replace(/_/g, '-'), // ID形式をAgent2に合わせる
-  name: formation.name,
-  tiers: formation.tiers,
-  targetPercentages: formation.percentages,
-  description: `${formation.tiers}銘柄による配分: ${formation.percentages.join('-')}%`
-});
+// 型変換ユーティリティのインポート
+import { 
+  convertAgent1ToAgent2Holding,
+  convertAgent2ToAgent1Holding,
+  convertAgent1ToAgent2Formation,
+  convertAgent2ToAgent1Formation,
+  convertAgent2ToAgent1FormationUsage,
+  convertHoldingsAgent1ToAgent2,
+  convertHoldingsAgent2ToAgent1,
+  convertFormationUsageAgent2ToAgent1
+} from './type-converters';
 
 // アクション関数の型定義
 interface AppActions {
@@ -73,13 +68,25 @@ interface AppActions {
   // UI状態管理
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
+  
+  // API連携アクション
+  loadDataFromAPI: () => Promise<void>;
+  saveDataToAPI: () => Promise<void>;
+  saveBudgetToAPI: (budget: Partial<BudgetType>) => Promise<void>;
+  saveHoldingsToAPI: (holdings: StockHoldingType[]) => Promise<void>;
+  saveFormationToAPI: (formationId: string) => Promise<void>;
+  
+  // 自動保存設定
+  enableAutoSave: () => void;
+  disableAutoSave: () => void;
+  isAutoSaveEnabled: boolean;
 }
 
 // ストアの型定義
 type AppStore = AppStateType & AppActions;
 
 // 初期状態の定義
-const initialState: AppStateType = {
+const initialState: AppStateType & { isAutoSaveEnabled: boolean } = {
   selectedFormation: null,
   tiers: [],
   budget: {
@@ -90,7 +97,8 @@ const initialState: AppStateType = {
   },
   formationUsage: [],
   isLoading: false,
-  error: null
+  error: null,
+  isAutoSaveEnabled: true
 };
 
 // Tier初期化関数
@@ -275,6 +283,191 @@ export const useAppStore = create<AppStore>()(
 
         setError: (error) => {
           set({ error, isLoading: false });
+        },
+
+        // API連携アクション
+        loadDataFromAPI: async () => {
+          set({ isLoading: true, error: null });
+          
+          try {
+            const apiData = await fetchAllData();
+            
+            // Agent2のフォーメーション形式をAgent1形式に変換
+            const agent1Formations = apiData.formations.map(f => ({
+              id: f.id.replace(/-/g, '_'), // IDをAgent1形式に変換
+              name: f.name,
+              tiers: f.tiers,
+              percentages: f.targetPercentages
+            }));
+
+            // Agent2のHolding形式をAgent1のStockHolding形式に変換
+            const agent1Holdings = convertHoldingsAgent2ToAgent1(apiData.holdings);
+            
+            // 設定からフォーメーションを特定
+            let selectedFormation = null;
+            if (apiData.settings.currentFormationId) {
+              const formationId = apiData.settings.currentFormationId.replace(/-/g, '_');
+              selectedFormation = FORMATION_DEFINITIONS.find(f => f.id === formationId) || null;
+            }
+
+            // フォーメーション使用統計を変換
+            const formationUsage = convertFormationUsageAgent2ToAgent1(apiData.usageStats);
+
+            // Tierを再構築（選択中のフォーメーションから）
+            let newTiers: TierType[] = [];
+            if (selectedFormation) {
+              newTiers = createInitialTiers(selectedFormation, apiData.budget.funds);
+              
+              // 保有銘柄をTierに配置（簡易実装）
+              agent1Holdings.forEach(holding => {
+                const tier = newTiers[0]; // 暫定的に最初のTierに配置
+                if (tier) {
+                  tier.stocks.push(holding);
+                }
+              });
+            }
+
+            // ストア状態を更新
+            set({
+              selectedFormation,
+              tiers: newTiers,
+              budget: {
+                funds: apiData.budget.funds,
+                start: apiData.budget.start,
+                profit: apiData.budget.profit,
+                returnPercentage: apiData.budget.returnPercentage || 0
+              },
+              formationUsage,
+              isLoading: false,
+              error: null
+            });
+
+          } catch (error) {
+            logApiError(error, 'loadDataFromAPI');
+            set({ 
+              error: getErrorMessage(error), 
+              isLoading: false 
+            });
+          }
+        },
+
+        saveDataToAPI: async () => {
+          const { selectedFormation, tiers, budget, isAutoSaveEnabled } = get();
+          
+          if (!isAutoSaveEnabled) return;
+
+          set({ isLoading: true, error: null });
+          
+          try {
+            // Tierから全ての保有銘柄を抽出
+            const allStocks = tiers.flatMap(tier => tier.stocks);
+            
+            // Agent1形式をAgent2形式に変換
+            const agent2Holdings = convertHoldingsAgent1ToAgent2(allStocks);
+            
+            // API形式の予算データに変換
+            const budgetData = {
+              funds: budget.funds,
+              start: budget.start,
+              profit: budget.profit
+            };
+
+            const requestData = {
+              budget: budgetData,
+              holdings: agent2Holdings,
+              formationId: selectedFormation?.id.replace(/_/g, '-') || undefined
+            };
+
+            await saveAllData(requestData);
+            
+            set({ isLoading: false, error: null });
+
+          } catch (error) {
+            logApiError(error, 'saveDataToAPI');
+            set({ 
+              error: getErrorMessage(error), 
+              isLoading: false 
+            });
+          }
+        },
+
+        saveBudgetToAPI: async (budgetUpdates) => {
+          set({ isLoading: true, error: null });
+          
+          try {
+            const updatedBudget = await saveBudget(budgetUpdates);
+            
+            set((state) => ({
+              budget: {
+                ...state.budget,
+                funds: updatedBudget.funds,
+                start: updatedBudget.start,
+                profit: updatedBudget.profit,
+                returnPercentage: updatedBudget.returnPercentage || 0
+              },
+              isLoading: false,
+              error: null
+            }));
+
+          } catch (error) {
+            logApiError(error, 'saveBudgetToAPI');
+            set({ 
+              error: getErrorMessage(error), 
+              isLoading: false 
+            });
+          }
+        },
+
+        saveHoldingsToAPI: async (holdings) => {
+          set({ isLoading: true, error: null });
+          
+          try {
+            const agent2Holdings = convertHoldingsAgent1ToAgent2(holdings);
+            await saveHoldings(agent2Holdings);
+            
+            set({ isLoading: false, error: null });
+
+          } catch (error) {
+            logApiError(error, 'saveHoldingsToAPI');
+            set({ 
+              error: getErrorMessage(error), 
+              isLoading: false 
+            });
+          }
+        },
+
+        saveFormationToAPI: async (formationId) => {
+          set({ isLoading: true, error: null });
+          
+          try {
+            const agent2FormationId = formationId.replace(/_/g, '-');
+            const result = await saveFormation(agent2FormationId);
+            
+            // 使用統計を更新
+            const updatedUsage = convertFormationUsageAgent2ToAgent1(result.usageStats);
+
+            set((state) => ({
+              formationUsage: updatedUsage,
+              isLoading: false,
+              error: null
+            }));
+
+          } catch (error) {
+            logApiError(error, 'saveFormationToAPI');
+            set({ 
+              error: getErrorMessage(error), 
+              isLoading: false 
+            });
+          }
+        },
+
+        // 自動保存設定
+        enableAutoSave: () => {
+          set({ isAutoSaveEnabled: true });
+        },
+
+        disableAutoSave: () => {
+          set({ isAutoSaveEnabled: false });
         }
       }),
       {
@@ -300,3 +493,13 @@ export const useBudget = () => useAppStore(state => state.budget);
 export const useFormationUsage = () => useAppStore(state => state.formationUsage);
 export const useIsLoading = () => useAppStore(state => state.isLoading);
 export const useError = () => useAppStore(state => state.error);
+
+// API関連のセレクタフック
+export const useLoadDataFromAPI = () => useAppStore(state => state.loadDataFromAPI);
+export const useSaveDataToAPI = () => useAppStore(state => state.saveDataToAPI);
+export const useSaveBudgetToAPI = () => useAppStore(state => state.saveBudgetToAPI);
+export const useSaveHoldingsToAPI = () => useAppStore(state => state.saveHoldingsToAPI);
+export const useSaveFormationToAPI = () => useAppStore(state => state.saveFormationToAPI);
+export const useAutoSaveEnabled = () => useAppStore(state => state.isAutoSaveEnabled);
+export const useEnableAutoSave = () => useAppStore(state => state.enableAutoSave);
+export const useDisableAutoSave = () => useAppStore(state => state.disableAutoSave);

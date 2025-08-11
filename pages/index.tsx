@@ -1,6 +1,15 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Layout from '@/components/layout/layout';
-import { useAppStore } from '@/lib/utils/appStore';
+import { 
+  useAppStore,
+  useLoadDataFromAPI,
+  useSaveDataToAPI,
+  useSaveBudgetToAPI,
+  useSaveFormationToAPI,
+  useAutoSaveEnabled,
+  useEnableAutoSave,
+  useDisableAutoSave
+} from '@/lib/utils/appStore';
 import { FORMATION_DEFINITIONS } from '@/lib/constants/types';
 import styles from '@/styles/modules/index.module.scss';
 import gridStyles from '@/styles/modules/grid.module.scss';
@@ -20,17 +29,84 @@ export default function SatelliteInvestmentApp() {
     updateBudget
   } = useAppStore();
 
-  useEffect(() => {
-    // 初期予算設定（6000ドル）
-    if (budget.funds === 0) {
-      updateBudget({ funds: 6000 });
-    }
-  }, [budget.funds, updateBudget]);
+  // API関連のフック
+  const loadDataFromAPI = useLoadDataFromAPI();
+  const saveDataToAPI = useSaveDataToAPI();
+  const saveBudgetToAPI = useSaveBudgetToAPI();
+  const saveFormationToAPI = useSaveFormationToAPI();
+  const isAutoSaveEnabled = useAutoSaveEnabled();
+  const enableAutoSave = useEnableAutoSave();
+  const disableAutoSave = useDisableAutoSave();
 
-  const handleFormationSelect = (formationId: string) => {
+  // ローカル状態
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+
+  // 初期データ読み込み
+  useEffect(() => {
+    if (!isInitialized) {
+      loadDataFromAPI().finally(() => {
+        setIsInitialized(true);
+      });
+    }
+  }, [loadDataFromAPI, isInitialized]);
+
+  // 自動保存（予算変更時）
+  useEffect(() => {
+    if (isInitialized && isAutoSaveEnabled && budget.funds > 0) {
+      const timeoutId = setTimeout(() => {
+        saveBudgetToAPI(budget);
+      }, 1000); // 1秒の遅延
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [budget, isInitialized, isAutoSaveEnabled, saveBudgetToAPI]);
+
+  const handleFormationSelect = async (formationId: string) => {
     const formation = FORMATION_DEFINITIONS.find(f => f.id === formationId);
     if (formation) {
       setSelectedFormation(formation);
+      
+      // API保存（フォーメーション変更時）
+      if (isAutoSaveEnabled) {
+        try {
+          await saveFormationToAPI(formation.id);
+          setSaveStatus('saved');
+          setTimeout(() => setSaveStatus('idle'), 2000);
+        } catch (err) {
+          setSaveStatus('error');
+          setTimeout(() => setSaveStatus('idle'), 3000);
+        }
+      }
+    }
+  };
+
+  const handleManualSave = async () => {
+    setSaveStatus('saving');
+    try {
+      await saveDataToAPI();
+      setSaveStatus('saved');
+      setTimeout(() => setSaveStatus('idle'), 2000);
+    } catch (err) {
+      setSaveStatus('error');
+      setTimeout(() => setSaveStatus('idle'), 3000);
+    }
+  };
+
+  const handleManualLoad = async () => {
+    try {
+      await loadDataFromAPI();
+    } catch (err) {
+      // エラーはストア内で処理済み
+    }
+  };
+
+  const getSaveStatusText = () => {
+    switch (saveStatus) {
+      case 'saving': return '保存中...';
+      case 'saved': return '保存完了';
+      case 'error': return '保存エラー';
+      default: return '';
     }
   };
 
@@ -44,6 +120,43 @@ export default function SatelliteInvestmentApp() {
             <div className={`${gridStyles['col--12']}`}>
               <h1 className={styles.title}>サテライト投資管理</h1>
               <p className={styles.subtitle}>6000ドル運用システム</p>
+              
+              {/* API連携コントロール */}
+              <div className={styles.apiControls}>
+                <div className={styles.controlGroup}>
+                  <button 
+                    onClick={handleManualLoad}
+                    disabled={isLoading}
+                    className={`${styles.apiButton} ${styles.loadButton}`}
+                  >
+                    {isLoading ? '読み込み中...' : 'データ読み込み'}
+                  </button>
+                  
+                  <button 
+                    onClick={handleManualSave}
+                    disabled={isLoading || saveStatus === 'saving'}
+                    className={`${styles.apiButton} ${styles.saveButton}`}
+                  >
+                    {saveStatus === 'saving' ? '保存中...' : 'データ保存'}
+                  </button>
+                  
+                  <button
+                    onClick={isAutoSaveEnabled ? disableAutoSave : enableAutoSave}
+                    className={`${styles.apiButton} ${styles.autoSaveButton} ${
+                      isAutoSaveEnabled ? styles.active : ''
+                    }`}
+                  >
+                    自動保存: {isAutoSaveEnabled ? 'ON' : 'OFF'}
+                  </button>
+                </div>
+                
+                {/* 保存ステータス表示 */}
+                {saveStatus !== 'idle' && (
+                  <div className={`${styles.saveStatus} ${styles[saveStatus]}`}>
+                    {getSaveStatusText()}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </section>
@@ -164,7 +277,24 @@ export default function SatelliteInvestmentApp() {
             <div className={`${gridStyles['row--container']} ${gutterStyles.container}`}>
               <div className={`${gridStyles['col--12']}`}>
                 <div className={styles.loadingCard}>
-                  <p>読み込み中...</p>
+                  <p>
+                    {!isInitialized ? 'アプリを初期化中...' : 'データを処理中...'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* 初期化中のオーバーレイ */}
+        {!isInitialized && (
+          <section className={`${styles.initializingSection}`}>
+            <div className={`${gridStyles['row--container']} ${gutterStyles.container}`}>
+              <div className={`${gridStyles['col--12']}`}>
+                <div className={styles.initializingCard}>
+                  <h2>データ読み込み中</h2>
+                  <p>サーバーからデータを取得しています...</p>
+                  {isLoading && <div className={styles.spinner}></div>}
                 </div>
               </div>
             </div>

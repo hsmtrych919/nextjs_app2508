@@ -76,7 +76,7 @@ export type LoadDataResponseType = {
   formationUsage: FormationUsageType[];
 };
 
-// フォーメーション定義の定数
+// フォーメーション定義の定数（Agent2 API形式と統合）
 export const FORMATION_DEFINITIONS: FormationType[] = [
   {
     id: 'formation_3_50_30_20',
@@ -97,3 +97,62 @@ export const FORMATION_DEFINITIONS: FormationType[] = [
     percentages: [30, 25, 20, 15, 10]
   }
 ];
+
+// Agent2 API型定義との互換性確保のための型エイリアス
+export type ApiFormationType = {
+  id: string;
+  name: string;
+  tiers: number;
+  targetPercentages: number[];
+  description: string;
+};
+
+export type ApiHoldingType = {
+  id: string;
+  ticker: string;
+  tier: number;
+  entryPrice: number;
+  holdShares: number;
+  goalShares: number;
+  currentPrice?: number;
+  updatedAt: string;
+};
+
+export type ApiBudgetType = {
+  id: string;
+  funds: number;
+  start: number;
+  profit: number;
+  returnPercentage?: number;
+  updatedAt: string;
+};
+
+export type ApiSettingsType = {
+  id: string;
+  currentFormationId: string;
+  lastCheckDate: string;
+  autoCheckEnabled: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type ApiFormationUsageType = {
+  id: string;
+  formationId: string;
+  usageCount: number;
+  totalDays: number;
+  usagePercentage: number;
+  lastUsedDate: string;
+  createdAt: string;
+};
+
+// Agent1⇔Agent2変換ユーティリティ関数型
+export type FormationIdConverter = {
+  toAgent2: (agent1Id: string) => string; // formation_3_50_30_20 → formation-3-50-30-20
+  toAgent1: (agent2Id: string) => string; // formation-3-50-30-20 → formation_3_50_30_20
+};
+
+export const formationIdConverter: FormationIdConverter = {
+  toAgent2: (agent1Id: string) => agent1Id.replace(/_/g, '-'),
+  toAgent1: (agent2Id: string) => agent2Id.replace(/-/g, '_')
+};
