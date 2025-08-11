@@ -1,14 +1,18 @@
 // サテライト投資管理アプリ - メインデータAPI
+// Agent 2 Phase 2-1: データCRUD API実装完成版
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { createDatabaseService, handleDatabaseError } from '../../src/lib/utils/database';
-import { FORMATIONS } from '../../src/lib/utils/types';
+import { createDatabaseService, handleDatabaseError, DatabaseError } from '../../src/lib/utils/database';
+import { FORMATIONS, API_ERROR_CODES, TICKER_SYMBOLS } from '../../src/lib/utils/types';
 import type { 
   ApiDataRequest, 
   ApiDataResponse, 
   CloudflareEnv,
   HoldingType,
   BudgetType,
-  SettingsType 
+  SettingsType,
+  FormationUsageType,
+  TickerSymbol,
+  ApiErrorCode
 } from '../../src/lib/utils/types';
 
 // 開発環境用のメモリ内データストレージ
@@ -16,18 +20,121 @@ const developmentStorage = {
   settings: null as SettingsType | null,
   budget: null as BudgetType | null,
   holdings: [] as HoldingType[],
-  usageStats: [] as any[]
+  usageStats: [] as FormationUsageType[]
 };
 
-// Cloudflare環境変数の型アサーション
+// Cloudflare環境変数の取得
 function getCloudflareEnv(): CloudflareEnv | null {
   if (process.env.NODE_ENV === 'development') {
-    // 開発環境では null を返し、メモリストレージを使用
-    return null;
+    return null; // 開発環境ではメモリストレージを使用
   }
-  
-  // 本番環境では Request の env プロパティから取得
   return (global as any).__env__ as CloudflareEnv;
+}
+
+// リクエストバリデーション関数
+function validateApiDataRequest(data: unknown): { valid: boolean; error?: string; errorCode?: ApiErrorCode } {
+  if (!data || typeof data !== 'object') {
+    return { 
+      valid: false, 
+      error: 'Request body must be a valid JSON object',
+      errorCode: API_ERROR_CODES.VALIDATION_ERROR
+    };
+  }
+
+  const request = data as Partial<ApiDataRequest>;
+
+  // 予算バリデーション
+  if (request.budget) {
+    const { funds, start, profit } = request.budget;
+    if (funds !== undefined && (typeof funds !== 'number' || funds < 0)) {
+      return { 
+        valid: false, 
+        error: 'Budget funds must be a positive number',
+        errorCode: API_ERROR_CODES.VALIDATION_ERROR
+      };
+    }
+    if (start !== undefined && (typeof start !== 'number' || start < 0)) {
+      return { 
+        valid: false, 
+        error: 'Budget start must be a positive number',
+        errorCode: API_ERROR_CODES.VALIDATION_ERROR
+      };
+    }
+    if (profit !== undefined && typeof profit !== 'number') {
+      return { 
+        valid: false, 
+        error: 'Budget profit must be a number',
+        errorCode: API_ERROR_CODES.VALIDATION_ERROR
+      };
+    }
+  }
+
+  // 保有銘柄バリデーション
+  if (request.holdings && Array.isArray(request.holdings)) {
+    for (const holding of request.holdings) {
+      if (!holding.id || !holding.ticker || typeof holding.tier !== 'number') {
+        return { 
+          valid: false, 
+          error: 'Each holding must have id, ticker, and tier',
+          errorCode: API_ERROR_CODES.VALIDATION_ERROR
+        };
+      }
+      
+      if (!TICKER_SYMBOLS.includes(holding.ticker as TickerSymbol)) {
+        return { 
+          valid: false, 
+          error: `Invalid ticker symbol: ${holding.ticker}`,
+          errorCode: API_ERROR_CODES.VALIDATION_ERROR
+        };
+      }
+
+      if (holding.tier < 1 || holding.tier > 5) {
+        return { 
+          valid: false, 
+          error: 'Tier must be between 1 and 5',
+          errorCode: API_ERROR_CODES.VALIDATION_ERROR
+        };
+      }
+
+      if (typeof holding.entryPrice !== 'number' || holding.entryPrice <= 0) {
+        return { 
+          valid: false, 
+          error: 'Entry price must be a positive number',
+          errorCode: API_ERROR_CODES.VALIDATION_ERROR
+        };
+      }
+
+      if (typeof holding.holdShares !== 'number' || holding.holdShares < 0) {
+        return { 
+          valid: false, 
+          error: 'Hold shares must be a non-negative number',
+          errorCode: API_ERROR_CODES.VALIDATION_ERROR
+        };
+      }
+
+      if (typeof holding.goalShares !== 'number' || holding.goalShares <= 0) {
+        return { 
+          valid: false, 
+          error: 'Goal shares must be a positive number',
+          errorCode: API_ERROR_CODES.VALIDATION_ERROR
+        };
+      }
+    }
+  }
+
+  // フォーメーションIDバリデーション
+  if (request.formationId) {
+    const validFormations = FORMATIONS.map(f => f.id);
+    if (!validFormations.includes(request.formationId)) {
+      return { 
+        valid: false, 
+        error: `Invalid formation ID: ${request.formationId}`,
+        errorCode: API_ERROR_CODES.INVALID_FORMATION
+      };
+    }
+  }
+
+  return { valid: true };
 }
 
 // 開発環境用のモックデータベースサービス
@@ -42,12 +149,13 @@ class MockDatabaseService {
   }
 
   async upsertBudget(budgetData: Partial<BudgetType>): Promise<BudgetType> {
-    const updated = {
-      id: 'dev-budget',
-      funds: budgetData.funds || 6000,
-      start: budgetData.start || 6000,
-      profit: budgetData.profit || 0,
-      updatedAt: new Date().toISOString(),
+    const now = new Date().toISOString();
+    const updated: BudgetType = {
+      id: developmentStorage.budget?.id || `dev-budget-${Date.now()}`,
+      funds: budgetData.funds ?? developmentStorage.budget?.funds ?? 6000,
+      start: budgetData.start ?? developmentStorage.budget?.start ?? 6000,
+      profit: budgetData.profit ?? developmentStorage.budget?.profit ?? 0,
+      updatedAt: now,
       ...budgetData
     };
     developmentStorage.budget = updated;
@@ -55,15 +163,14 @@ class MockDatabaseService {
   }
 
   async upsertSettings(settingsData: Partial<SettingsType>): Promise<SettingsType> {
-    const updated = {
-      id: 'dev-settings',
-      currentFormationId: 'formation-3-50-30-20',
-      lastCheckDate: new Date().toISOString(),
-      autoCheckEnabled: true,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      ...developmentStorage.settings,
-      ...settingsData
+    const now = new Date().toISOString();
+    const updated: SettingsType = {
+      id: developmentStorage.settings?.id || `dev-settings-${Date.now()}`,
+      currentFormationId: settingsData.currentFormationId ?? developmentStorage.settings?.currentFormationId ?? 'formation-3-50-30-20',
+      lastCheckDate: settingsData.lastCheckDate ?? now,
+      autoCheckEnabled: settingsData.autoCheckEnabled ?? developmentStorage.settings?.autoCheckEnabled ?? true,
+      createdAt: developmentStorage.settings?.createdAt ?? now,
+      updatedAt: now
     };
     developmentStorage.settings = updated;
     return updated;
@@ -74,26 +181,49 @@ class MockDatabaseService {
   }
 
   async upsertHolding(holding: HoldingType): Promise<HoldingType> {
+    const now = new Date().toISOString();
+    const updatedHolding: HoldingType = {
+      ...holding,
+      updatedAt: now
+    };
+    
     const existingIndex = developmentStorage.holdings.findIndex(h => h.id === holding.id);
     if (existingIndex >= 0) {
-      developmentStorage.holdings[existingIndex] = holding;
+      developmentStorage.holdings[existingIndex] = updatedHolding;
     } else {
-      developmentStorage.holdings.push(holding);
+      developmentStorage.holdings.push(updatedHolding);
     }
-    return holding;
+    return updatedHolding;
   }
 
-  async upsertFormationUsage(formationId: string) {
-    // 開発環境では簡単な実装
-    return {
-      id: `dev-usage-${formationId}`,
-      formationId,
-      usageCount: 1,
-      totalDays: 1,
-      usagePercentage: 100,
-      lastUsedDate: new Date().toISOString(),
-      createdAt: new Date().toISOString()
-    };
+  async upsertFormationUsage(formationId: string): Promise<FormationUsageType> {
+    const now = new Date().toISOString();
+    const existingIndex = developmentStorage.usageStats.findIndex(u => u.formationId === formationId);
+    
+    if (existingIndex >= 0) {
+      const existing = developmentStorage.usageStats[existingIndex];
+      const updated: FormationUsageType = {
+        ...existing,
+        usageCount: existing.usageCount + 1,
+        totalDays: existing.totalDays + 1,
+        usagePercentage: ((existing.usageCount + 1) / (existing.totalDays + 1)) * 100,
+        lastUsedDate: now
+      };
+      developmentStorage.usageStats[existingIndex] = updated;
+      return updated;
+    } else {
+      const newUsage: FormationUsageType = {
+        id: `dev-usage-${formationId}-${Date.now()}`,
+        formationId,
+        usageCount: 1,
+        totalDays: 1,
+        usagePercentage: 100,
+        lastUsedDate: now,
+        createdAt: now
+      };
+      developmentStorage.usageStats.push(newUsage);
+      return newUsage;
+    }
   }
 }
 
@@ -101,215 +231,368 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<ApiDataResponse>
 ) {
+  const startTime = Date.now();
+  const requestId = req.headers['x-request-id'] as string || `req-${Date.now()}`;
+
   try {
+    // データベースサービス初期化
     const env = getCloudflareEnv();
     const dbService = env ? createDatabaseService(env) : new MockDatabaseService();
 
     if (req.method === 'GET') {
-      // 全データ取得
-      const data = await dbService.getAllData();
-      
-      const response: ApiDataResponse = {
-        success: true,
-        timestamp: new Date().toISOString(),
-        data: {
-          budget: data.budget || {
-            id: 'default-budget',
-            funds: 6000,
-            start: 6000,
-            profit: 0,
-            updatedAt: new Date().toISOString()
-          },
-          holdings: data.holdings || [],
-          settings: data.settings || {
-            id: 'default-settings',
-            currentFormationId: 'formation-3-50-30-20',
-            lastCheckDate: new Date().toISOString(),
-            autoCheckEnabled: true,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-          },
-          formations: FORMATIONS,
-          usageStats: data.usageStats || []
-        }
-      };
+      // Phase 2-1: GET /api/data 完全実装
+      try {
+        const data = await dbService.getAllData();
+        
+        const response: ApiDataResponse = {
+          success: true,
+          timestamp: new Date().toISOString(),
+          data: {
+            budget: data.budget || {
+              id: `default-budget-${Date.now()}`,
+              funds: 6000,
+              start: 6000,
+              profit: 0,
+              updatedAt: new Date().toISOString()
+            },
+            holdings: data.holdings || [],
+            settings: data.settings || {
+              id: `default-settings-${Date.now()}`,
+              currentFormationId: 'formation-3-50-30-20',
+              lastCheckDate: new Date().toISOString(),
+              autoCheckEnabled: true,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
+            },
+            formations: FORMATIONS,
+            usageStats: data.usageStats || []
+          }
+        };
 
-      res.status(200).json(response);
+        console.log(`[${requestId}] GET /api/data completed in ${Date.now() - startTime}ms`);
+        res.status(200).json(response);
+
+      } catch (dbError) {
+        throw new DatabaseError('Failed to retrieve data from database', dbError as Error);
+      }
       
     } else if (req.method === 'POST') {
-      // データ保存 - 入力検証
-      if (!req.body || typeof req.body !== 'object') {
+      // Phase 2-1: POST /api/data 完全実装（バリデーション強化）
+      
+      // リクエスト検証
+      const validation = validateApiDataRequest(req.body);
+      if (!validation.valid) {
         return res.status(400).json({
           success: false,
           timestamp: new Date().toISOString(),
           error: {
-            code: 'INVALID_REQUEST_BODY',
-            message: 'Invalid request body. Expected JSON object.'
+            code: validation.errorCode || API_ERROR_CODES.VALIDATION_ERROR,
+            message: validation.error || 'Invalid request data'
           }
         });
       }
 
       const requestData = req.body as ApiDataRequest;
       
-      let updatedBudget: BudgetType | null = null;
-      let updatedSettings: SettingsType | null = null;
-      const updatedHoldings: HoldingType[] = [];
+      try {
+        let updatedBudget: BudgetType | null = null;
+        let updatedSettings: SettingsType | null = null;
+        const updatedHoldings: HoldingType[] = [];
 
-      // 予算更新
-      if (requestData.budget) {
-        updatedBudget = await dbService.upsertBudget(requestData.budget);
-      }
+        // データ更新処理（トランザクション的に処理）
+        const updatePromises = [];
 
-      // 設定更新
-      if (requestData.settings || requestData.formationId) {
-        const settingsUpdate: Partial<SettingsType> = {
-          ...requestData.settings
+        // 予算更新
+        if (requestData.budget) {
+          updatePromises.push(
+            dbService.upsertBudget(requestData.budget).then(result => {
+              updatedBudget = result;
+            })
+          );
+        }
+
+        // 設定・フォーメーション更新
+        if (requestData.settings || requestData.formationId) {
+          const settingsUpdate: Partial<SettingsType> = {
+            ...requestData.settings
+          };
+          
+          if (requestData.formationId) {
+            settingsUpdate.currentFormationId = requestData.formationId;
+            settingsUpdate.lastCheckDate = new Date().toISOString();
+          }
+          
+          updatePromises.push(
+            dbService.upsertSettings(settingsUpdate).then(result => {
+              updatedSettings = result;
+            })
+          );
+
+          // フォーメーション使用統計を並行更新
+          if (requestData.formationId) {
+            updatePromises.push(
+              dbService.upsertFormationUsage(requestData.formationId)
+            );
+          }
+        }
+
+        // 基本更新を並行実行
+        await Promise.all(updatePromises);
+
+        // 保有銘柄更新（フルリプレース）
+        if (requestData.holdings && Array.isArray(requestData.holdings) && requestData.holdings.length > 0) {
+          await dbService.clearAllHoldings();
+          
+          const holdingPromises = requestData.holdings.map(holding => 
+            dbService.upsertHolding(holding)
+          );
+          
+          const results = await Promise.all(holdingPromises);
+          updatedHoldings.push(...results);
+        }
+
+        // 最終データ取得
+        const finalData = await dbService.getAllData();
+
+        const response: ApiDataResponse = {
+          success: true,
+          timestamp: new Date().toISOString(),
+          data: {
+            budget: updatedBudget || finalData.budget || {
+              id: `default-budget-${Date.now()}`,
+              funds: 6000,
+              start: 6000,
+              profit: 0,
+              updatedAt: new Date().toISOString()
+            },
+            holdings: updatedHoldings.length > 0 ? updatedHoldings : finalData.holdings || [],
+            settings: updatedSettings || finalData.settings || {
+              id: `default-settings-${Date.now()}`,
+              currentFormationId: 'formation-3-50-30-20',
+              lastCheckDate: new Date().toISOString(),
+              autoCheckEnabled: true,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
+            },
+            formations: FORMATIONS,
+            usageStats: finalData.usageStats || []
+          }
         };
-        
-        if (requestData.formationId) {
-          settingsUpdate.currentFormationId = requestData.formationId;
-          // フォーメーション使用統計を更新
-          await dbService.upsertFormationUsage(requestData.formationId);
-        }
-        
-        updatedSettings = await dbService.upsertSettings(settingsUpdate);
+
+        console.log(`[${requestId}] POST /api/data completed in ${Date.now() - startTime}ms`);
+        res.status(200).json(response);
+
+      } catch (dbError) {
+        throw new DatabaseError('Failed to save data to database', dbError as Error);
       }
-
-      // 保有銘柄更新
-      if (requestData.holdings && requestData.holdings.length > 0) {
-        // 全ての保有銘柄を更新（フルリプレース）
-        await dbService.clearAllHoldings();
-        
-        for (const holding of requestData.holdings) {
-          const updated = await dbService.upsertHolding(holding);
-          updatedHoldings.push(updated);
-        }
-      }
-
-      // 更新後のデータを取得
-      const data = await dbService.getAllData();
-
-      const response: ApiDataResponse = {
-        success: true,
-        timestamp: new Date().toISOString(),
-        data: {
-          budget: updatedBudget || data.budget || {
-            id: 'default-budget',
-            funds: 6000,
-            start: 6000,
-            profit: 0,
-            updatedAt: new Date().toISOString()
-          },
-          holdings: updatedHoldings.length > 0 ? updatedHoldings : data.holdings || [],
-          settings: updatedSettings || data.settings || {
-            id: 'default-settings',
-            currentFormationId: 'formation-3-50-30-20',
-            lastCheckDate: new Date().toISOString(),
-            autoCheckEnabled: true,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-          },
-          formations: FORMATIONS,
-          usageStats: data.usageStats || []
-        }
-      };
-
-      res.status(200).json(response);
       
     } else {
-      // サポートされていないメソッド
+      // サポートされていないHTTPメソッド
       res.status(405).json({
         success: false,
         timestamp: new Date().toISOString(),
         error: {
-          code: 'METHOD_NOT_ALLOWED',
-          message: `Method ${req.method} Not Allowed`
+          code: API_ERROR_CODES.METHOD_NOT_ALLOWED,
+          message: `HTTP method ${req.method} is not allowed for this endpoint`
         }
-      } as ApiDataResponse);
+      });
     }
     
   } catch (error) {
-    console.error('API Error:', error);
+    // Phase 2-1: 強化されたエラーハンドリング
+    console.error(`[${requestId}] API Error:`, error);
     
-    // 開発環境では詳細なエラー情報を返す
+    let errorCode: ApiErrorCode = API_ERROR_CODES.INTERNAL_ERROR;
+    let errorMessage = 'Internal server error occurred';
+    let statusCode = 500;
+
+    if (error instanceof DatabaseError) {
+      errorCode = API_ERROR_CODES.DATABASE_ERROR;
+      errorMessage = 'Database operation failed';
+    }
+
+    // 開発環境では詳細なエラー情報を提供
     if (process.env.NODE_ENV === 'development') {
-      return res.status(500).json({
-        success: false,
-        timestamp: new Date().toISOString(),
-        error: {
-          code: 'DEVELOPMENT_ERROR',
-          message: `Development error: ${error instanceof Error ? error.message : 'Unknown error occurred'}`
-        }
-      } as ApiDataResponse);
+      errorMessage = `Development error: ${error instanceof Error ? error.message : 'Unknown error'}`;
     }
     
-    // 本番環境では安全なエラーメッセージのみ
-    const envVar = getCloudflareEnv();
-    const dbError = envVar ? handleDatabaseError(error) : new Error('Development mode error');
-    
-    res.status(500).json({
+    res.status(statusCode).json({
       success: false,
       timestamp: new Date().toISOString(),
       error: {
-        code: 'INTERNAL_SERVER_ERROR',
-        message: 'Internal server error occurred'
+        code: errorCode,
+        message: errorMessage,
+        ...(process.env.NODE_ENV === 'development' && {
+          details: {
+            requestId,
+            processingTime: `${Date.now() - startTime}ms`,
+            stack: error instanceof Error ? error.stack : undefined
+          }
+        })
       }
-    } as ApiDataResponse);
+    });
   }
 }
 
-// Cloudflare Pages Functions用のエクスポート
-// この関数は Cloudflare Pages で自動的に呼ばれる
+// Phase 2-1: Cloudflare Pages Functions 完全統合
+// Drizzle ORM DatabaseService を完全統合した Cloudflare Pages Functions
+
 export async function onRequestGet(context: any) {
   const { request, env } = context;
   
-  // Cloudflare 環境を global に設定
-  (global as any).__env__ = env;
-  
-  const url = new URL(request.url);
-  const mockReq = {
-    method: 'GET',
-    url: url.pathname,
-    query: Object.fromEntries(url.searchParams),
-    body: null
-  } as any;
+  try {
+    // Cloudflare環境をグローバルに設定（DatabaseService統合）
+    (global as any).__env__ = env;
+    
+    const url = new URL(request.url);
+    const mockReq = {
+      method: 'GET',
+      url: url.pathname,
+      query: Object.fromEntries(url.searchParams),
+      headers: {
+        'x-request-id': `cf-get-${Date.now()}`
+      },
+      body: null
+    } as NextApiRequest;
 
-  const mockRes = {
-    status: (code: number) => ({
-      json: (data: any) => new Response(JSON.stringify(data), {
-        status: code,
-        headers: { 'Content-Type': 'application/json' }
+    let responseData: ApiDataResponse;
+    let statusCode = 200;
+
+    const mockRes = {
+      status: (code: number) => ({
+        json: (data: ApiDataResponse) => {
+          responseData = data;
+          statusCode = code;
+          return new Response(JSON.stringify(data), {
+            status: code,
+            headers: { 
+              'Content-Type': 'application/json',
+              'Access-Control-Allow-Origin': '*',
+              'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+              'Access-Control-Allow-Headers': 'Content-Type, x-request-id'
+            }
+          });
+        }
       })
-    })
-  } as any;
+    } as NextApiResponse<ApiDataResponse>;
 
-  await handler(mockReq, mockRes);
+    await handler(mockReq, mockRes);
+    
+    return new Response(JSON.stringify(responseData!), {
+      status: statusCode,
+      headers: { 
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      }
+    });
+
+  } catch (error) {
+    console.error('Cloudflare GET handler error:', error);
+    return new Response(JSON.stringify({
+      success: false,
+      timestamp: new Date().toISOString(),
+      error: {
+        code: API_ERROR_CODES.INTERNAL_ERROR,
+        message: 'Cloudflare function execution failed'
+      }
+    }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
 }
 
 export async function onRequestPost(context: any) {
   const { request, env } = context;
   
-  // Cloudflare 環境を global に設定
-  (global as any).__env__ = env;
-  
-  const body = await request.json();
-  const url = new URL(request.url);
-  
-  const mockReq = {
-    method: 'POST',
-    url: url.pathname,
-    query: Object.fromEntries(url.searchParams),
-    body
-  } as any;
-
-  const mockRes = {
-    status: (code: number) => ({
-      json: (data: any) => new Response(JSON.stringify(data), {
-        status: code,
+  try {
+    // Cloudflare環境をグローバルに設定（DatabaseService統合）
+    (global as any).__env__ = env;
+    
+    let body;
+    try {
+      body = await request.json();
+    } catch (parseError) {
+      return new Response(JSON.stringify({
+        success: false,
+        timestamp: new Date().toISOString(),
+        error: {
+          code: API_ERROR_CODES.VALIDATION_ERROR,
+          message: 'Invalid JSON in request body'
+        }
+      }), {
+        status: 400,
         headers: { 'Content-Type': 'application/json' }
-      })
-    })
-  } as any;
+      });
+    }
+    
+    const url = new URL(request.url);
+    const mockReq = {
+      method: 'POST',
+      url: url.pathname,
+      query: Object.fromEntries(url.searchParams),
+      headers: {
+        'x-request-id': `cf-post-${Date.now()}`
+      },
+      body
+    } as NextApiRequest;
 
-  await handler(mockReq, mockRes);
+    let responseData: ApiDataResponse;
+    let statusCode = 200;
+
+    const mockRes = {
+      status: (code: number) => ({
+        json: (data: ApiDataResponse) => {
+          responseData = data;
+          statusCode = code;
+          return new Response(JSON.stringify(data), {
+            status: code,
+            headers: { 
+              'Content-Type': 'application/json',
+              'Access-Control-Allow-Origin': '*',
+              'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+              'Access-Control-Allow-Headers': 'Content-Type, x-request-id'
+            }
+          });
+        }
+      })
+    } as NextApiResponse<ApiDataResponse>;
+
+    await handler(mockReq, mockRes);
+    
+    return new Response(JSON.stringify(responseData!), {
+      status: statusCode,
+      headers: { 
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      }
+    });
+
+  } catch (error) {
+    console.error('Cloudflare POST handler error:', error);
+    return new Response(JSON.stringify({
+      success: false,
+      timestamp: new Date().toISOString(),
+      error: {
+        code: API_ERROR_CODES.INTERNAL_ERROR,
+        message: 'Cloudflare function execution failed'
+      }
+    }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+}
+
+// CORS対応のOPTIONSハンドラー
+export async function onRequestOptions() {
+  return new Response(null, {
+    status: 200,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, x-request-id',
+      'Access-Control-Max-Age': '86400'
+    }
+  });
 }
