@@ -268,8 +268,8 @@ export class DatabaseService {
         lastUsedDate: now
       };
       
-      // 使用率計算
-      updated.usagePercentage = (updated.usageCount / updated.totalDays) * 100;
+      // 精密な使用率計算（小数点以下2桁まで）
+      updated.usagePercentage = Math.round((updated.usageCount / updated.totalDays) * 10000) / 100;
 
       await this.db
         .update(formationUsage)
@@ -291,13 +291,18 @@ export class DatabaseService {
         createdAt: updated.createdAt
       };
     } else {
-      // 新規作成
+      // 新規作成 - 全体のtotalDaysを考慮して初期値を設定
+      const allExistingStats = await this.getFormationUsage();
+      const globalTotalDays = allExistingStats.length > 0 
+        ? Math.max(...allExistingStats.map(stat => stat.totalDays))
+        : 1;
+
       const newUsage: FormationUsageType = {
         id: `usage-${formationId}-${Date.now()}`,
         formationId,
         usageCount: 1,
-        totalDays: 1,
-        usagePercentage: 100,
+        totalDays: globalTotalDays,
+        usagePercentage: Math.round((1 / globalTotalDays) * 10000) / 100,
         lastUsedDate: now,
         createdAt: now
       };
@@ -313,6 +318,123 @@ export class DatabaseService {
       });
 
       return newUsage;
+    }
+  }
+
+  // 使用率再計算（メンテナンス用）
+  async recalculateAllUsagePercentages(): Promise<FormationUsageType[]> {
+    const allStats = await this.getFormationUsage();
+    const updatedStats: FormationUsageType[] = [];
+
+    for (const stat of allStats) {
+      if (stat.totalDays > 0) {
+        const newUsagePercentage = Math.round((stat.usageCount / stat.totalDays) * 10000) / 100;
+        
+        await this.db
+          .update(formationUsage)
+          .set({
+            usagePercentage: newUsagePercentage
+          })
+          .where(eq(formationUsage.id, stat.id));
+
+        updatedStats.push({
+          ...stat,
+          usagePercentage: newUsagePercentage
+        });
+      } else {
+        updatedStats.push(stat);
+      }
+    }
+
+    return updatedStats;
+  }
+
+  // フォーメーション変更検知とカウント更新
+  async checkFormationChangeAndUpdate(): Promise<{
+    hasChanged: boolean;
+    previousFormation: string | null;
+    currentFormation: string;
+    updateResult?: FormationUsageType;
+  }> {
+    const currentSettings = await this.getSettings();
+    if (!currentSettings) {
+      throw new DatabaseError('Settings not found. Please initialize the database first.');
+    }
+
+    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+    const lastCheckDate = currentSettings.lastCheckDate.split('T')[0];
+    const currentFormationId = currentSettings.currentFormationId;
+
+    // 前日のフォーメーション情報を取得（履歴から）
+    const recentHistory = await this.db
+      .select()
+      .from(formationHistory)
+      .orderBy(desc(formationHistory.changedAt))
+      .limit(1);
+
+    const previousFormationId = recentHistory.length > 0 
+      ? recentHistory[0].fromFormationId 
+      : null;
+
+    // 日付が変わっている場合のみチェック実行
+    if (lastCheckDate === today) {
+      return {
+        hasChanged: false,
+        previousFormation: previousFormationId,
+        currentFormation: currentFormationId
+      };
+    }
+
+    // フォーメーション変更があったかチェック
+    const hasFormationChanged = previousFormationId && previousFormationId !== currentFormationId;
+
+    if (hasFormationChanged) {
+      // フォーメーション変更履歴を記録
+      await this.db.insert(formationHistory).values({
+        id: `history-${Date.now()}`,
+        fromFormationId: previousFormationId,
+        toFormationId: currentFormationId,
+        changedAt: new Date().toISOString(),
+        reason: 'Daily check detected change'
+      });
+    }
+
+    // 現在のフォーメーションの使用統計を更新
+    const updateResult = await this.upsertFormationUsage(currentFormationId);
+
+    // 他の全フォーメーションのtotalDaysを増加
+    await this.incrementTotalDaysForAllFormations(currentFormationId);
+
+    // 設定のlastCheckDateを更新
+    await this.upsertSettings({
+      lastCheckDate: new Date().toISOString()
+    });
+
+    return {
+      hasChanged: hasFormationChanged || false,
+      previousFormation: previousFormationId,
+      currentFormation: currentFormationId,
+      updateResult
+    };
+  }
+
+  // 全フォーメーションのtotalDaysを増加（現在使用中以外）
+  private async incrementTotalDaysForAllFormations(currentFormationId: string): Promise<void> {
+    const allUsageStats = await this.getFormationUsage();
+    
+    for (const usage of allUsageStats) {
+      if (usage.formationId !== currentFormationId) {
+        const newTotalDays = usage.totalDays + 1;
+        const newUsagePercentage = Math.round((usage.usageCount / newTotalDays) * 10000) / 100;
+
+        await this.db
+          .update(formationUsage)
+          .set({
+            totalDays: newTotalDays,
+            usagePercentage: newUsagePercentage
+          })
+          .where(eq(formationUsage.id, usage.id));
+      }
     }
   }
 
@@ -360,9 +482,38 @@ export function createDatabaseService(env: CloudflareEnv): DatabaseService {
 
 // エラーハンドリング用
 export class DatabaseError extends Error {
-  constructor(message: string, public cause?: Error) {
+  public readonly errorType: 'CONNECTION' | 'TIMEOUT' | 'AUTHENTICATION' | 'QUERY' | 'CONSTRAINT' | 'UNKNOWN';
+  
+  constructor(message: string, public cause?: Error, errorType: DatabaseError['errorType'] = 'UNKNOWN') {
     super(message);
     this.name = 'DatabaseError';
+    this.errorType = errorType;
+  }
+  
+  static fromError(error: Error): DatabaseError {
+    const message = error.message.toLowerCase();
+    
+    if (message.includes('timeout') || message.includes('timed out')) {
+      return new DatabaseError('データベース接続がタイムアウトしました', error, 'TIMEOUT');
+    }
+    
+    if (message.includes('connection') || message.includes('connect')) {
+      return new DatabaseError('データベースへの接続に失敗しました', error, 'CONNECTION');
+    }
+    
+    if (message.includes('auth') || message.includes('credential') || message.includes('permission')) {
+      return new DatabaseError('データベース認証に失敗しました', error, 'AUTHENTICATION');
+    }
+    
+    if (message.includes('constraint') || message.includes('duplicate') || message.includes('foreign key')) {
+      return new DatabaseError('データベース制約違反が発生しました', error, 'CONSTRAINT');
+    }
+    
+    if (message.includes('query') || message.includes('syntax') || message.includes('sql')) {
+      return new DatabaseError('データベースクエリの実行に失敗しました', error, 'QUERY');
+    }
+    
+    return new DatabaseError(`データベースエラーが発生しました: ${error.message}`, error, 'UNKNOWN');
   }
 }
 
@@ -372,8 +523,8 @@ export function handleDatabaseError(error: unknown): DatabaseError {
   }
   
   if (error instanceof Error) {
-    return new DatabaseError(`Database operation failed: ${error.message}`, error);
+    return DatabaseError.fromError(error);
   }
   
-  return new DatabaseError('Unknown database error occurred');
+  return new DatabaseError('不明なデータベースエラーが発生しました', undefined, 'UNKNOWN');
 }

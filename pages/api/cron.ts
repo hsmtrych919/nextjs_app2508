@@ -1,7 +1,8 @@
 // サテライト投資管理アプリ - 自動チェック（Cron）API
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createDatabaseService, handleDatabaseError } from '../../src/lib/utils/database';
-import { FORMATIONS } from '../../src/lib/utils/types';
+import { sendErrorResponse } from '../../src/lib/utils/api-error-handler';
+import { FORMATIONS, API_ERROR_CODES } from '../../src/lib/utils/types';
 import type { 
   ApiCronResponse, 
   CloudflareEnv,
@@ -58,68 +59,81 @@ class MockCronService {
   }
 }
 
-// フォーメーション変更を検知する関数
+// フォーメーション変更を検知する関数（DatabaseServiceの新メソッドを使用）
 async function checkFormationChange(dbService: any): Promise<{
   hasChanged: boolean;
   currentFormationId: string;
   lastCheckDate: string;
+  previousFormation?: string | null;
 }> {
-  const settings = await dbService.getSettings();
-  
-  if (!settings) {
-    // 初回実行時は変更なしとして扱う
+  // MockCronServiceの場合は既存のロジックを使用
+  if (dbService instanceof MockCronService) {
+    const settings = await dbService.getSettings();
+    
+    if (!settings) {
+      return {
+        hasChanged: false,
+        currentFormationId: 'formation-3-50-30-20',
+        lastCheckDate: new Date().toISOString()
+      };
+    }
+
+    const now = new Date();
+    const lastCheck = new Date(settings.lastCheckDate);
+    const daysSinceLastCheck = Math.floor((now.getTime() - lastCheck.getTime()) / (1000 * 60 * 60 * 24));
+
     return {
-      hasChanged: false,
-      currentFormationId: 'formation-3-50-30-20',
-      lastCheckDate: new Date().toISOString()
+      hasChanged: daysSinceLastCheck >= 1,
+      currentFormationId: settings.currentFormationId,
+      lastCheckDate: settings.lastCheckDate
     };
   }
 
-  const now = new Date();
-  const lastCheck = new Date(settings.lastCheckDate);
-  const daysSinceLastCheck = Math.floor((now.getTime() - lastCheck.getTime()) / (1000 * 60 * 60 * 24));
+  // 本番環境：DatabaseServiceの新しいメソッドを使用
+  try {
+    const changeResult = await dbService.checkFormationChangeAndUpdate();
+    return {
+      hasChanged: changeResult.hasChanged,
+      currentFormationId: changeResult.currentFormation,
+      lastCheckDate: new Date().toISOString(),
+      previousFormation: changeResult.previousFormation
+    };
+  } catch (error) {
+    console.error('Error in formation change detection:', error);
+    // フォールバック：設定から情報を取得
+    const settings = await dbService.getSettings();
+    if (!settings) {
+      throw error;
+    }
 
-  // 前日から変更があったかどうか（簡単な実装）
-  // 実際のプロダクションでは、より精密な変更検知が必要
-  const hasChanged = daysSinceLastCheck >= 1;
-
-  return {
-    hasChanged,
-    currentFormationId: settings.currentFormationId,
-    lastCheckDate: settings.lastCheckDate
-  };
+    return {
+      hasChanged: false,
+      currentFormationId: settings.currentFormationId,
+      lastCheckDate: settings.lastCheckDate
+    };
+  }
 }
 
 // フォーメーション使用統計を更新する関数
 async function updateFormationUsageStats(
   dbService: any, 
-  currentFormationId: string
+  currentFormationId: string,
+  hasChanged: boolean
 ): Promise<FormationUsageType[]> {
   try {
-    // 現在のフォーメーションの使用統計を更新
-    const updatedUsage = await dbService.upsertFormationUsage(currentFormationId);
-    
-    // 他のフォーメーションの総日数も増加させる
-    const allUsageStats = await dbService.getFormationUsage();
-    const updatedStats: FormationUsageType[] = [];
-
-    for (const stat of allUsageStats) {
-      if (stat.formationId !== currentFormationId) {
-        // 現在のフォーメーション以外は総日数のみ増加
-        const updated = {
-          ...stat,
-          totalDays: stat.totalDays + 1,
-          usagePercentage: (stat.usageCount / (stat.totalDays + 1)) * 100
-        };
-        
-        // データベースを更新（簡略実装）
-        updatedStats.push(updated);
-      } else {
-        updatedStats.push(updatedUsage);
-      }
+    // MockCronService用の従来ロジック
+    if (dbService instanceof MockCronService) {
+      const updatedUsage = await dbService.upsertFormationUsage(currentFormationId);
+      return [updatedUsage];
     }
 
-    return updatedStats;
+    // DatabaseServiceの場合：checkFormationChangeAndUpdateで既に更新済み
+    if (!hasChanged) {
+      return await dbService.getFormationUsage();
+    }
+
+    // 本番環境：変更検知と更新が既に完了しているため、最新の統計を取得
+    return await dbService.getFormationUsage();
   } catch (error) {
     console.error('Error updating formation usage stats:', error);
     return [];
@@ -130,6 +144,9 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<ApiCronResponse>
 ) {
+  const startTime = Date.now();
+  const requestId = req.headers['x-request-id'] as string || `cron-${Date.now()}`;
+
   try {
     // POSTメソッドのみ許可
     if (req.method !== 'POST') {
@@ -137,8 +154,8 @@ export default async function handler(
         success: false,
         timestamp: new Date().toISOString(),
         error: {
-          code: 'METHOD_NOT_ALLOWED',
-          message: `Method ${req.method} Not Allowed`
+          code: API_ERROR_CODES.METHOD_NOT_ALLOWED,
+          message: `HTTPメソッド ${req.method} は許可されていません`
         }
       });
     }
@@ -150,11 +167,12 @@ export default async function handler(
     const changeCheck = await checkFormationChange(dbService);
 
     if (!changeCheck.hasChanged) {
+      console.log(`[${requestId}] No changes detected in ${Date.now() - startTime}ms`);
       return res.status(200).json({
         success: true,
         timestamp: new Date().toISOString(),
         data: {
-          message: 'No changes detected since last check',
+          message: '前回のチェック以降、変更は検出されませんでした',
           changesDetected: false,
           processedFormations: []
         }
@@ -164,7 +182,8 @@ export default async function handler(
     // フォーメーション使用統計を更新
     const updatedStats = await updateFormationUsageStats(
       dbService, 
-      changeCheck.currentFormationId
+      changeCheck.currentFormationId,
+      changeCheck.hasChanged
     );
 
     // 最終チェック日時を更新
@@ -172,11 +191,12 @@ export default async function handler(
       lastCheckDate: new Date().toISOString()
     });
 
+    console.log(`[${requestId}] Cron job completed in ${Date.now() - startTime}ms`);
     res.status(200).json({
       success: true,
       timestamp: new Date().toISOString(),
       data: {
-        message: `Formation usage statistics updated for ${changeCheck.currentFormationId}`,
+        message: `フォーメーション使用統計を更新しました: ${changeCheck.currentFormationId}`,
         changesDetected: true,
         processedFormations: [changeCheck.currentFormationId],
         updatedUsage: updatedStats
@@ -184,31 +204,10 @@ export default async function handler(
     });
 
   } catch (error) {
-    console.error('Cron API Error:', error);
-    
-    // 開発環境では詳細なエラー情報を返す
-    if (process.env.NODE_ENV === 'development') {
-      return res.status(500).json({
-        success: false,
-        timestamp: new Date().toISOString(),
-        error: {
-          code: 'DEVELOPMENT_ERROR',
-          message: `Development error: ${error instanceof Error ? error.message : 'Unknown error'}`
-        }
-      });
-    }
-    
-    // 本番環境では安全なエラーメッセージ
-    const envVar = getCloudflareEnv();
-    const dbError = envVar ? handleDatabaseError(error) : new Error('Development error');
-    
-    res.status(500).json({
-      success: false,
-      timestamp: new Date().toISOString(),
-      error: {
-        code: 'CRON_EXECUTION_ERROR',
-        message: 'Cron job execution failed'
-      }
+    // 統一されたエラーハンドリング関数を使用
+    sendErrorResponse(res, error, {
+      requestId,
+      processingTime: Date.now() - startTime
     });
   }
 }
@@ -228,10 +227,7 @@ export async function scheduled(event: any, env: CloudflareEnv, ctx: any) {
     const changeCheck = await checkFormationChange(dbService);
     
     if (changeCheck.hasChanged) {
-      await updateFormationUsageStats(dbService, changeCheck.currentFormationId);
-      await dbService.upsertSettings({
-        lastCheckDate: new Date().toISOString()
-      });
+      await updateFormationUsageStats(dbService, changeCheck.currentFormationId, changeCheck.hasChanged);
       
       console.log(`Formation usage updated for: ${changeCheck.currentFormationId}`);
     } else {
