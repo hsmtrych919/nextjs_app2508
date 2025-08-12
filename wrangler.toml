@@ -6,23 +6,23 @@ name = "satellite-investment-app"
 compatibility_date = "2025-08-10"
 compatibility_flags = ["nodejs_compat"]
 
-# アカウント設定（実際のデプロイ時に設定）
-# account_id = "your-account-id-here"
+# アカウント設定（環境変数で管理）
+# account_id = { var = "CLOUDFLARE_ACCOUNT_ID" }
 
 # Pages Functions設定
 pages_build_output_dir = "_dist"
 
-# D1データベース設定
+# D1データベース設定（ローカル開発用）
 [[d1_databases]]
 binding = "DB"
 database_name = "satellite-investment-db"
-database_id = "your-database-id-here" # wrangler d1 create で取得したIDを設定
+database_id = "31102c68-1cd7-4696-862f-2a115724f331"  # ローカル開発用
 
-# 本番用D1設定（別データベース）
+# 本番用D1設定（環境変数で管理）
 [[env.production.d1_databases]]
 binding = "DB"
 database_name = "satellite-investment-db-prod"
-database_id = "your-prod-database-id-here"  # 実際のデプロイ時に更新が必要
+database_id = { var = "PROD_DATABASE_ID" }  # 本番用環境変数参照
 
 # Cron Triggers設定
 [[triggers.crons]]
@@ -53,11 +53,11 @@ ENVIRONMENT = "development"
 DEBUG_MODE = "true"
 LOG_LEVEL = "debug"
 
-# ビルド設定
-[build]
-command = "npm run build:deploy"
-cwd = "."
-watch_dir = ["src", "pages", "public", "styles"]
+# ビルド設定（ローカル開発時は手動でnpm run buildを実行）
+# [build]
+# command = "npm run build"
+# cwd = "."
+# watch_dir = ["src", "pages", "public", "styles"]
 
 # リソース制限
 [limits]
@@ -106,7 +106,7 @@ status = 301
 # Functions設定
 [pages.functions]
 # Functions のディレクトリ（デフォルト: functions/）
-directory = "pages/api"
+directory = "functions"
 
 # 互換性設定
 [pages.functions.compatibility]

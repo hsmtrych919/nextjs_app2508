@@ -183,6 +183,13 @@ export default function PageDemo() {
 }
 
 export async function getStaticProps() {
+  // 本番環境では404を返してページを無効化
+  if (process.env.NODE_ENV === 'production') {
+    return {
+      notFound: true,
+    };
+  }
+
   const pageMeta = {
     title: 'snippet page',
     ogUrl: 'demo/',
