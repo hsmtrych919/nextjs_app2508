@@ -3,7 +3,6 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "build:deploy": "REAL_DEPLOY=true next build",
     "start": "next start",
     "serve": "npx serve _dist",
     "imgmin": "node imagemin.config.js",
@@ -13,10 +12,10 @@
     "db:migrate:prod": "./scripts/manage-migrations.sh migrate-prod",
     "db:status": "./scripts/manage-migrations.sh status-local",
     "db:reset": "./scripts/manage-migrations.sh reset-local",
-    "deploy": "npm run build:deploy && wrangler pages deploy _dist",
-    "deploy:preview": "npm run build:deploy && wrangler pages deploy _dist --env=preview",
-    "deploy:prod": "npm run build:deploy && wrangler pages deploy _dist --env=production",
-    "deploy:staging": "npm run build:deploy && wrangler pages deploy _dist --env=preview"
+    "deploy": "npm run build && wrangler pages deploy _dist",
+    "deploy:preview": "npm run build && wrangler pages deploy _dist --env=preview",
+    "deploy:prod": "npm run build && wrangler pages deploy _dist --env=production",
+    "deploy:staging": "npm run build && wrangler pages deploy _dist --env=preview"
   },
   "browserslist": {
     "development": [

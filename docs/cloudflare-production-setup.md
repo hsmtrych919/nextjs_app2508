@@ -27,8 +27,8 @@ database_id = "production-database-id-here"
 
 #### 本番デプロイスクリプト追加
 ```json
-"deploy:prod": "npm run build:deploy && wrangler pages deploy _dist --env=production",
-"deploy:staging": "npm run build:deploy && wrangler pages deploy _dist --env=preview"
+"deploy:prod": "npm run build && wrangler pages deploy _dist --env=production",
+"deploy:staging": "npm run build && wrangler pages deploy _dist --env=preview"
 ```
 
 #### 本番環境でのCron設定確認

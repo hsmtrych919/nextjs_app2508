@@ -55,8 +55,8 @@ wrangler d1 create satellite-investment-db
 
 #### 1. プロジェクトビルド
 ```bash
-# デプロイ用ビルド（prefixPath適用）
-npm run build:deploy
+# デプロイ用ビルド
+npm run build
 ```
 
 #### 2. Pages プロジェクト作成
@@ -187,7 +187,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
       - run: npm install
-      - run: npm run build:deploy
+      - run: npm run build
       - run: wrangler pages deploy _dist
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}

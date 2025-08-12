@@ -16,9 +16,9 @@
 - **説明**: prefixPathを適用しない静的エクスポート
 - **重要**: ローカルでの動作確認専用
 
-#### `npm run build:deploy`
-- **用途**: 本番ビルド（デプロイ用）
-- **説明**: `REAL_DEPLOY=true`環境変数によりprefixPathを適用
+#### `npm run build`
+- **用途**: プロダクションビルド（デプロイ用）
+- **説明**: 静的エクスポートファイルを生成
 - **注意**: デプロイサーバー用の設定が適用される
 
 #### `npm run start`
@@ -75,8 +75,8 @@ npm run serve
 ### 3. 本番デプロイ準備フロー
 
 ```bash
-# 1. 本番ビルド作成
-npm run build:deploy
+# 1. プロダクションビルド作成
+npm run build
 
 # 2. 静的ファイル配信で最終確認
 npm run serve
@@ -91,8 +91,8 @@ npm run serve
 
 このプロジェクトは二重環境ビルドシステムを採用：
 
-- **開発/テスト環境**: `npm run build` - prefixPathなし
-- **本番環境**: `npm run build:deploy` - prefixPath適用
+- **開発/テスト環境**: `npm run build` - 開発用ビルド
+- **本番環境**: `npm run build` - プロダクション用ビルド
 
 ### Path Management
 
@@ -125,7 +125,7 @@ npm run serve
 
 パスエイリアス設定済み：
 - `@components/*` → `components/*`
-- `@features/*` → `features/*`  
+- `@features/*` → `features/*`
 - `@styles/*` → `styles/*`
 
 ## Browser Compatibility
@@ -141,5 +141,5 @@ npm run serve
 
 ---
 
-**最終更新**: 2025-07-31  
+**最終更新**: 2025-07-31
 **対象環境**: Next.js 13.5, TypeScript, SCSS

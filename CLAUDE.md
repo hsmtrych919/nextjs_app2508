@@ -13,8 +13,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Core Development
 - `npm run dev` - Start development server
-- `npm run build` - Development build (no prefixPath, for local testing)
-- `npm run build:deploy` - Production build with prefixPath for deployment
+- `npm run build` - Production build for deployment
 - `npm run start` - Start production server
 - `npm run serve` - Serve built files from _dist directory
 
@@ -28,11 +27,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Architecture Overview
 
 ### Dual Environment Build System
-This project uses a sophisticated dual-environment build system:
-- **Development/Testing**: `npm run build` creates builds without prefixPath for local testing
-- **Production**: `npm run build:deploy` sets `REAL_DEPLOY=true` to apply prefixPath for deployment
+This project uses a unified build system:
+- **Development/Testing**: `npm run build` creates static export builds for deployment
+- **Production**: `npm run build` creates the same static export builds for deployment
 
-The build behavior is controlled in `next.config.js:9` where `prefixPath` is conditionally set based on `REAL_DEPLOY` environment variable.
+The build behavior is configured in `next.config.js` for static export compatibility.
 
 ### Path Management System
 All images and links use custom components from `@features/rewrite-path.tsx`:
@@ -83,7 +82,7 @@ Path aliases are configured in `tsconfig.json:17-21`:
 
 ### Development Workflow
 1. Always run `npm run build` + `npm run serve` to verify changes work in static export
-2. Use `npm run build:deploy` only for final production builds
+2. Use `npm run build` for all builds
 3. Image paths automatically include cache-busting timestamps
 4. Background images in SCSS are processed and rewritten during build
 

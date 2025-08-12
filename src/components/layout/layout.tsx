@@ -41,9 +41,9 @@ export default function LayoutBasic({ children }: LayoutProps) {
 
   return (
     <>
-      <Header />
+      {/* <Header /> */}
       <main>{children}</main>
-      <Footer />
+      {/* <Footer /> */}
     </>
   );
 }
