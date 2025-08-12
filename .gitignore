@@ -11,3 +11,5 @@ draft.jsx
 .env
 .env.local
 .env.*
+.playwright-mcp/
+.wrangler/
