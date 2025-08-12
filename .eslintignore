@@ -1,0 +1,14 @@
+# Ignore Drizzle configuration file
+drizzle.config.ts
+drizzle/
+
+# Ignore build output
+_dist/
+.next/
+
+# Ignore node_modules
+node_modules/
+
+# Ignore temporary files
+.claude/
+.tmp/

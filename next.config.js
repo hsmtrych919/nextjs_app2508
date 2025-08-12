@@ -22,7 +22,6 @@ const prefixPath = (isProd && isRealDeploy) ? 'https://xxx.com' : '';
 const nextConfig = {
   // Strict Mode
   reactStrictMode: true,
-  output: 'export',
   basePath: '',
   // css,jsのアセットファイルのパスにプレフィックスをつける
   assetPrefix: prefixPath,

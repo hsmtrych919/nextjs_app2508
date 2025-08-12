@@ -7,7 +7,16 @@
     "start": "next start",
     "serve": "npx serve _dist",
     "imgmin": "node imagemin.config.js",
-    "eslint": "npx eslint --fix \"pages/**/*.{ts,tsx}\" \"components/**/*.{ts,tsx}\" \"features/**/*.{ts,tsx}\""
+    "eslint": "npx eslint --fix \"pages/**/*.{ts,tsx}\" \"components/**/*.{ts,tsx}\" \"features/**/*.{ts,tsx}\"",
+    "db:setup": "./scripts/setup-database.sh",
+    "db:migrate": "./scripts/manage-migrations.sh migrate-local",
+    "db:migrate:prod": "./scripts/manage-migrations.sh migrate-prod",
+    "db:status": "./scripts/manage-migrations.sh status-local",
+    "db:reset": "./scripts/manage-migrations.sh reset-local",
+    "deploy": "npm run build:deploy && wrangler pages deploy _dist",
+    "deploy:preview": "npm run build:deploy && wrangler pages deploy _dist --env=preview",
+    "deploy:prod": "npm run build:deploy && wrangler pages deploy _dist --env=production",
+    "deploy:staging": "npm run build:deploy && wrangler pages deploy _dist --env=preview"
   },
   "browserslist": {
     "development": [
@@ -23,12 +32,15 @@
     ]
   },
   "dependencies": {
+    "@cloudflare/workers-types": "^4.20250810.0",
     "@heroicons/react": "^2.0.18",
     "@radix-ui/react-label": "^2.1.7",
     "@radix-ui/react-select": "^2.2.5",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "decimal.js": "^10.6.0",
+    "drizzle-kit": "^0.31.4",
+    "drizzle-orm": "^0.44.4",
     "gsap": "^3.13.0",
     "lucide-react": "^0.539.0",
     "next": "^13.5",
@@ -38,6 +50,7 @@
     "react-modal": "^3.16.1",
     "scroll-hint": "^1.2.9",
     "smooth-scroll": "^16.1.3",
+    "wrangler": "^4.28.1",
     "zustand": "^5.0.7"
   },
   "devDependencies": {
