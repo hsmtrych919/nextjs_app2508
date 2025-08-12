@@ -1,21 +1,15 @@
 import { useEffect, useState } from 'react';
 import Layout from '@/components/layout/layout';
+import BudgetManager from '@/components/ui/BudgetManager';
+import StockInput from '@/components/ui/StockInput';
 import {
   useAppStore,
-  useLoadDataFromAPI,
-  useSaveDataToAPI,
-  useSaveBudgetToAPI,
-  useSaveFormationToAPI,
-  useAutoSaveEnabled,
-  useEnableAutoSave,
-  useDisableAutoSave
+  useLoadDataFromAPI
 } from '@/lib/utils/appStore';
 import { FORMATION_DEFINITIONS } from '@/lib/constants/types';
 import styles from '@/styles/modules/index.module.scss';
 import gridStyles from '@/styles/modules/grid.module.scss';
-import gutterStyles from '@/styles/modules/gutter.module.scss';
-
-// ファイル下に meta情報用の getStaticProps記載
+import gutterStyles from '@/styles/modules/gutter.module.scss';// ファイル下に meta情報用の getStaticProps記載
 
 export default function SatelliteInvestmentApp() {
   const {
@@ -103,6 +97,26 @@ export default function SatelliteInvestmentApp() {
             </div>
           </div>
         </section>
+
+        {/* Tier別銘柄入力セクション（一時的にコメントアウト） */}
+        {/*selectedFormation && (
+          <section className={`${styles.stockInputSection}`}>
+            <div className={`${gridStyles['row--container']} ${gutterStyles.container}`}>
+              <div className={`${gridStyles['col--12']}`}>
+                <StockInput />
+              </div>
+            </div>
+          </section>
+        )*/}
+
+        {/* 予算管理セクション（一時的にコメントアウト） */}
+        {/*<section className={`${styles.budgetManagerSection}`}>
+          <div className={`${gridStyles['row--container']} ${gutterStyles.container}`}>
+            <div className={`${gridStyles['col--12']}`}>
+              <BudgetManager />
+            </div>
+          </div>
+        </section>*/}
 
         {/* フォーメーション使用統計 */}
         {formationUsage.length > 0 && (
