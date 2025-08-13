@@ -98,8 +98,8 @@ export default function SatelliteInvestmentApp() {
           </div>
         </section>
 
-        {/* Tier別銘柄入力セクション（一時的にコメントアウト） */}
-        {/*selectedFormation && (
+        {/* Tier別銘柄入力セクション */}
+        {selectedFormation && (
           <section className={`${styles.stockInputSection}`}>
             <div className={`${gridStyles['row--container']} ${gutterStyles.container}`}>
               <div className={`${gridStyles['col--12']}`}>
@@ -107,7 +107,7 @@ export default function SatelliteInvestmentApp() {
               </div>
             </div>
           </section>
-        )*/}
+        )}
 
         {/* 予算管理セクション（一時的にコメントアウト） */}
         {/*<section className={`${styles.budgetManagerSection}`}>
