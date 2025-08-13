@@ -1,36 +1,36 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
-import { 
-  AppStateType, 
-  FormationType, 
-  TierType, 
-  BudgetType, 
-  FormationUsageType, 
+import {
+  AppStateType,
+  FormationType,
+  TierType,
+  BudgetType,
+  FormationUsageType,
   StockHoldingType,
-  FORMATION_DEFINITIONS 
+  FORMATION_DEFINITIONS
 } from '../constants/types';
 // Agent2のAPI統合型を追加インポート
-import type { 
+import type {
   HoldingType as Agent2HoldingType,
   BudgetType as Agent2BudgetType,
   FormationType as Agent2FormationType,
   FORMATIONS
 } from './types';
 // APIクライアント
-import { 
-  fetchAllData, 
-  saveAllData, 
-  saveBudget, 
-  saveHoldings, 
+import {
+  fetchAllData,
+  saveAllData,
+  saveBudget,
+  saveHoldings,
   saveFormation,
   ApiError,
   isApiError,
   getErrorMessage,
-  logApiError 
+  logApiError
 } from './api-client';
 
 // 型変換ユーティリティのインポート
-import { 
+import {
   convertAgent1ToAgent2Holding,
   convertAgent2ToAgent1Holding,
   convertAgent1ToAgent2Formation,
@@ -46,36 +46,36 @@ interface AppActions {
   // フォーメーション管理
   setSelectedFormation: (formation: FormationType) => void;
   clearFormation: () => void;
-  
+
   // Tier管理
   updateTier: (tierId: string, updates: Partial<TierType>) => void;
   addStockToTier: (tierId: string, stock: StockHoldingType) => void;
   updateStockInTier: (tierId: string, stockId: string, updates: Partial<StockHoldingType>) => void;
   removeStockFromTier: (tierId: string, stockId: string) => void;
-  
+
   // 予算管理
   updateBudget: (budget: Partial<BudgetType>) => void;
   calculateBudgetMetrics: () => void;
-  
+
   // フォーメーション使用統計
   updateFormationUsage: (formationId: string) => void;
   getFormationUsagePercentage: (formationId: string) => number;
-  
+
   // データ管理
   loadData: (data: Partial<AppStateType>) => void;
   resetAllData: () => void;
-  
+
   // UI状態管理
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
-  
+
   // API連携アクション
   loadDataFromAPI: () => Promise<void>;
   saveDataToAPI: () => Promise<void>;
   saveBudgetToAPI: (budget: Partial<BudgetType>) => Promise<void>;
   saveHoldingsToAPI: (holdings: StockHoldingType[]) => Promise<void>;
   saveFormationToAPI: (formationId: string) => Promise<void>;
-  
+
   // 自動保存設定
   enableAutoSave: () => void;
   disableAutoSave: () => void;
@@ -122,22 +122,22 @@ export const useAppStore = create<AppStore>()(
         setSelectedFormation: (formation) => {
           const { budget } = get();
           const newTiers = createInitialTiers(formation, budget.funds);
-          
+
           set((state) => ({
             selectedFormation: formation,
             tiers: newTiers,
             error: null
           }));
-          
+
           // フォーメーション使用統計を更新
           get().updateFormationUsage(formation.id);
         },
 
         clearFormation: () => {
-          set({ 
-            selectedFormation: null, 
+          set({
+            selectedFormation: null,
             tiers: [],
-            error: null 
+            error: null
           });
         },
 
@@ -153,7 +153,7 @@ export const useAppStore = create<AppStore>()(
         addStockToTier: (tierId, stock) => {
           set((state) => ({
             tiers: state.tiers.map(tier =>
-              tier.id === tierId 
+              tier.id === tierId
                 ? { ...tier, stocks: [...tier.stocks, stock] }
                 : tier
             )
@@ -189,12 +189,7 @@ export const useAppStore = create<AppStore>()(
         updateBudget: (budgetUpdates) => {
           set((state) => {
             const newBudget = { ...state.budget, ...budgetUpdates };
-            
-            // リターン率を自動計算
-            if (newBudget.start > 0) {
-              newBudget.returnPercentage = ((newBudget.profit / newBudget.start) * 100);
-            }
-            
+
             // フォーメーション選択時はTierの目標金額も更新
             let updatedTiers = state.tiers;
             if (state.selectedFormation && budgetUpdates.funds) {
@@ -225,13 +220,13 @@ export const useAppStore = create<AppStore>()(
         updateFormationUsage: (formationId) => {
           set((state) => {
             const existingUsage = state.formationUsage.find(u => u.formationId === formationId);
-            
+
             let newFormationUsage;
             if (existingUsage) {
               newFormationUsage = state.formationUsage.map(usage =>
                 usage.formationId === formationId
-                  ? { 
-                      ...usage, 
+                  ? {
+                      ...usage,
                       usageCount: usage.usageCount + 1,
                       lastUsed: new Date()
                     }
@@ -288,10 +283,10 @@ export const useAppStore = create<AppStore>()(
         // API連携アクション
         loadDataFromAPI: async () => {
           set({ isLoading: true, error: null });
-          
+
           try {
             const apiData = await fetchAllData();
-            
+
             // Agent2のフォーメーション形式をAgent1形式に変換
             const agent1Formations = apiData.formations.map(f => ({
               id: f.id.replace(/-/g, '_'), // IDをAgent1形式に変換
@@ -302,7 +297,7 @@ export const useAppStore = create<AppStore>()(
 
             // Agent2のHolding形式をAgent1のStockHolding形式に変換
             const agent1Holdings = convertHoldingsAgent2ToAgent1(apiData.holdings);
-            
+
             // 設定からフォーメーションを特定
             let selectedFormation = null;
             if (apiData.settings.currentFormationId) {
@@ -317,7 +312,7 @@ export const useAppStore = create<AppStore>()(
             let newTiers: TierType[] = [];
             if (selectedFormation) {
               newTiers = createInitialTiers(selectedFormation, apiData.budget.funds);
-              
+
               // 保有銘柄をTierに配置（簡易実装）
               agent1Holdings.forEach(holding => {
                 const tier = newTiers[0]; // 暫定的に最初のTierに配置
@@ -344,27 +339,27 @@ export const useAppStore = create<AppStore>()(
 
           } catch (error) {
             logApiError(error, 'loadDataFromAPI');
-            set({ 
-              error: getErrorMessage(error), 
-              isLoading: false 
+            set({
+              error: getErrorMessage(error),
+              isLoading: false
             });
           }
         },
 
         saveDataToAPI: async () => {
           const { selectedFormation, tiers, budget, isAutoSaveEnabled } = get();
-          
+
           if (!isAutoSaveEnabled) return;
 
           set({ isLoading: true, error: null });
-          
+
           try {
             // Tierから全ての保有銘柄を抽出
             const allStocks = tiers.flatMap(tier => tier.stocks);
-            
+
             // Agent1形式をAgent2形式に変換
             const agent2Holdings = convertHoldingsAgent1ToAgent2(allStocks);
-            
+
             // API形式の予算データに変換
             const budgetData = {
               funds: budget.funds,
@@ -379,24 +374,24 @@ export const useAppStore = create<AppStore>()(
             };
 
             await saveAllData(requestData);
-            
+
             set({ isLoading: false, error: null });
 
           } catch (error) {
             logApiError(error, 'saveDataToAPI');
-            set({ 
-              error: getErrorMessage(error), 
-              isLoading: false 
+            set({
+              error: getErrorMessage(error),
+              isLoading: false
             });
           }
         },
 
         saveBudgetToAPI: async (budgetUpdates) => {
           set({ isLoading: true, error: null });
-          
+
           try {
             const updatedBudget = await saveBudget(budgetUpdates);
-            
+
             set((state) => ({
               budget: {
                 ...state.budget,
@@ -411,38 +406,38 @@ export const useAppStore = create<AppStore>()(
 
           } catch (error) {
             logApiError(error, 'saveBudgetToAPI');
-            set({ 
-              error: getErrorMessage(error), 
-              isLoading: false 
+            set({
+              error: getErrorMessage(error),
+              isLoading: false
             });
           }
         },
 
         saveHoldingsToAPI: async (holdings) => {
           set({ isLoading: true, error: null });
-          
+
           try {
             const agent2Holdings = convertHoldingsAgent1ToAgent2(holdings);
             await saveHoldings(agent2Holdings);
-            
+
             set({ isLoading: false, error: null });
 
           } catch (error) {
             logApiError(error, 'saveHoldingsToAPI');
-            set({ 
-              error: getErrorMessage(error), 
-              isLoading: false 
+            set({
+              error: getErrorMessage(error),
+              isLoading: false
             });
           }
         },
 
         saveFormationToAPI: async (formationId) => {
           set({ isLoading: true, error: null });
-          
+
           try {
             const agent2FormationId = formationId.replace(/_/g, '-');
             const result = await saveFormation(agent2FormationId);
-            
+
             // 使用統計を更新
             const updatedUsage = convertFormationUsageAgent2ToAgent1(result.usageStats);
 
@@ -454,9 +449,9 @@ export const useAppStore = create<AppStore>()(
 
           } catch (error) {
             logApiError(error, 'saveFormationToAPI');
-            set({ 
-              error: getErrorMessage(error), 
-              isLoading: false 
+            set({
+              error: getErrorMessage(error),
+              isLoading: false
             });
           }
         },

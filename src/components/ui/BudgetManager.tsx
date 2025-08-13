@@ -1,54 +1,34 @@
-import React, { useEffect } from 'react';
+import React, { useState } from 'react';
 import { DollarSignIcon, TrendingUpIcon, PiggyBankIcon } from 'lucide-react';
-import { useAppStore } from '@/lib/utils/appStore';
-import { calculateReturnPercentage } from '@/lib/utils/calculations';
 import styles from '@/styles/modules/type.module.scss';
 
 /**
  * BudgetManagerコンポーネント
- * 
+ *
  * 予算管理機能を提供するコンポーネントです。
  * Funds（資金）、Start（開始元本）、Profit（利益）の入力と
  * Return％の自動計算・表示を行います。
- * 
+ *
  * 主な機能:
  * - Funds、Start、Profit入力フィールド
  * - Return％の自動計算・表示
- * - Zustandストアとの完全統合
+ * - シンプルなローカル状態管理
  * - モバイル対応のレスポンシブデザイン
- * 
+ *
  * @example
  * ```tsx
  * <BudgetManager />
  * ```
- * 
+ *
  * @returns BudgetManagerコンポーネント
  */
 export default function BudgetManager() {
-  const { budget, updateBudget } = useAppStore(state => ({
-    budget: state.budget,
-    updateBudget: state.updateBudget
-  }));
+  const [funds, setFunds] = useState(6000);
+  const [start, setStart] = useState(6000);
+  const [profit, setProfit] = useState(0);
 
-  /**
-   * フィールド値更新ハンドラ
-   */
-  const handleFieldChange = (field: keyof typeof budget, value: string) => {
-    const numericValue = parseFloat(value) || 0;
-    updateBudget({ [field]: numericValue });
-  };
-
-  /**
-   * Return％自動計算
-   */
-  useEffect(() => {
-    if (budget.start > 0) {
-      const returnPercentage = calculateReturnPercentage(budget.profit, budget.start);
-      if (returnPercentage !== budget.returnPercentage) {
-        updateBudget({ returnPercentage });
-      }
-    }
-  }, [budget.profit, budget.start, budget.returnPercentage, updateBudget]);
+  // Return%計算
+  const returnPercentage = start > 0 ? ((profit / start) * 100) : 0;
 
   return (
     <div className="budget-manager">
@@ -69,23 +49,13 @@ export default function BudgetManager() {
           <div className="input-wrapper">
             <span className="input-prefix">$</span>
             <input
-              type="text"
-              inputMode="decimal"
+              type="number"
               className="budget-input"
               placeholder="6000.00"
-              value={budget.funds || ''}
-              onChange={(e) => {
-                const value = e.target.value;
-                // 数値と小数点のみ許可
-                if (value === '' || /^\d*\.?\d*$/.test(value)) {
-                  handleFieldChange('funds', value);
-                }
-              }}
+              value={funds}
+              onChange={(e) => setFunds(parseFloat(e.target.value) || 0)}
             />
           </div>
-          <p className="input-help">
-            サテライト投資に使用する総予算を入力してください
-          </p>
         </div>
 
         {/* Start入力 */}
@@ -97,22 +67,13 @@ export default function BudgetManager() {
           <div className="input-wrapper">
             <span className="input-prefix">$</span>
             <input
-              type="text"
-              inputMode="decimal"
+              type="number"
               className="budget-input"
               placeholder="0.00"
-              value={budget.start || ''}
-              onChange={(e) => {
-                const value = e.target.value;
-                if (value === '' || /^\d*\.?\d*$/.test(value)) {
-                  handleFieldChange('start', value);
-                }
-              }}
+              value={start}
+              onChange={(e) => setStart(parseFloat(e.target.value) || 0)}
             />
           </div>
-          <p className="input-help">
-            投資開始時の元本金額を入力してください
-          </p>
         </div>
 
         {/* Profit入力 */}
@@ -124,23 +85,13 @@ export default function BudgetManager() {
           <div className="input-wrapper">
             <span className="input-prefix">$</span>
             <input
-              type="text"
-              inputMode="decimal"
+              type="number"
               className="budget-input profit-input"
               placeholder="0.00"
-              value={budget.profit || ''}
-              onChange={(e) => {
-                const value = e.target.value;
-                // 負の値も許可
-                if (value === '' || /^-?\d*\.?\d*$/.test(value)) {
-                  handleFieldChange('profit', value);
-                }
-              }}
+              value={profit}
+              onChange={(e) => setProfit(parseFloat(e.target.value) || 0)}
             />
           </div>
-          <p className="input-help">
-            現在の利益（損失の場合は負の値）を入力してください
-          </p>
         </div>
 
         {/* Return％表示 */}
@@ -148,14 +99,14 @@ export default function BudgetManager() {
           <div className="return-card">
             <div className="return-header">
               <h3 className={styles['title--small']}>Return %</h3>
-              <div className={`return-value ${budget.returnPercentage >= 0 ? 'positive' : 'negative'}`}>
-                {budget.returnPercentage >= 0 ? '+' : ''}{budget.returnPercentage.toFixed(2)}%
+              <div className={`return-value ${returnPercentage >= 0 ? 'positive' : 'negative'}`}>
+                {returnPercentage >= 0 ? '+' : ''}{returnPercentage.toFixed(2)}%
               </div>
             </div>
             <div className="return-calculation">
-              {budget.start > 0 ? (
+              {start > 0 ? (
                 <span className="calculation-formula">
-                  ${budget.profit.toFixed(2)} ÷ ${budget.start.toFixed(2)} × 100
+                  ${profit.toFixed(2)} ÷ ${start.toFixed(2)} × 100
                 </span>
               ) : (
                 <span className="calculation-note">
@@ -167,22 +118,22 @@ export default function BudgetManager() {
         </div>
 
         {/* 予算概要 */}
-        {budget.funds > 0 && (
+        {funds > 0 && (
           <div className="budget-summary">
             <h3 className={styles['title--small']}>予算概要</h3>
             <div className="summary-grid">
               <div className="summary-item">
                 <span className="summary-label">総予算</span>
-                <span className="summary-value">${budget.funds.toLocaleString()}</span>
+                <span className="summary-value">${funds.toLocaleString()}</span>
               </div>
               <div className="summary-item">
                 <span className="summary-label">開始元本</span>
-                <span className="summary-value">${budget.start.toLocaleString()}</span>
+                <span className="summary-value">${start.toLocaleString()}</span>
               </div>
               <div className="summary-item">
                 <span className="summary-label">現在利益</span>
-                <span className={`summary-value ${budget.profit >= 0 ? 'positive' : 'negative'}`}>
-                  ${budget.profit >= 0 ? '+' : ''}${budget.profit.toLocaleString()}
+                <span className={`summary-value ${profit >= 0 ? 'positive' : 'negative'}`}>
+                  ${profit >= 0 ? '+' : ''}${profit.toLocaleString()}
                 </span>
               </div>
             </div>

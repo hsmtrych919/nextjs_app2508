@@ -79,7 +79,7 @@ export default function SatelliteInvestmentApp() {
                   ))}
                 </div>
 
-
+　
               </div>
             </div>
           </div>
@@ -96,14 +96,14 @@ export default function SatelliteInvestmentApp() {
           </section>
         )}
 
-        {/* 予算管理セクション（一時的にコメントアウト） */}
-        {/*<section className={`${styles.budgetManagerSection}`}>
+        {/* 予算管理セクション */}
+        <section className={`${styles.budgetManagerSection}`}>
           <div className={`${gridStyles['row--container']} ${gutterStyles.container}`}>
             <div className={`${gridStyles['col--12']}`}>
               <BudgetManager />
             </div>
           </div>
-        </section>*/}
+        </section>
 
         {/* フォーメーション使用統計 - 常に表示 */}
         <section className={`${styles.statsSection}`}>

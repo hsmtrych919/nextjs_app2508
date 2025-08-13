@@ -13,3 +13,5 @@ draft.jsx
 .env.*
 .playwright-mcp/
 .wrangler/
+playwright-report/
+test-results/
