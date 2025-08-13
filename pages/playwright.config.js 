@@ -1,0 +1,61 @@
+// @ts-check
+const { defineConfig, devices } = require('@playwright/test');
+
+/**
+ * @see https://playwright.dev/docs/test-configuration
+ */
+module.exports = defineConfig({
+  testDir: './tests',
+
+  /* すべてのテストを並列実行 */
+  fullyParallel: true,
+
+  /* CI環境でのみfail fastを有効化 */
+  forbidOnly: !!process.env.CI,
+
+  /* CI環境でのリトライ設定 */
+  retries: process.env.CI ? 2 : 0,
+
+  /* テスト並列実行数の最適化 */
+  workers: process.env.CI ? 1 : undefined,
+
+  /* HTMLレポート生成 */
+  reporter: 'html',
+
+  /* 全プロジェクト共通設定 */
+  use: {
+    /* 失敗時にトレース収集 */
+    trace: 'on-first-retry',
+
+    /* スクリーンショット設定 */
+    screenshot: 'only-on-failure',
+
+    /* ビデオ録画設定 */
+    video: 'retain-on-failure'
+  },
+
+  /* プロジェクト設定 - Firefox プライベートモード + iPhone エミュレーション */
+  projects: [
+    {
+      name: 'firefox-private-iphone',
+      use: {
+        ...devices['iPhone 12'],
+        browserName: 'firefox',
+
+        /* プライベートブラウジングモード有効化 */
+        launchOptions: {
+          args: ['--private-window']
+        },
+
+        /* iPhone 12/13 Pro iOS 14.6 の詳細設定 */
+        viewport: { width: 390, height: 844 },
+        deviceScaleFactor: 3,
+        isMobile: true,
+        hasTouch: true,
+
+        /* User Agent を iPhone 12/13 Pro iOS 14.6 に設定 */
+        userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1.1 Mobile/15E148 Safari/604.1'
+      }
+    }
+  ]
+});
