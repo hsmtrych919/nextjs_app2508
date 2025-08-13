@@ -76,7 +76,7 @@ export default function StockInput() {
       <div className={`${gridStyles['row--container']} ${gutterStyles.container}`}>
         <div className={`${gridStyles['col--12']}`}>
           <div className={styles.stockInputCard}>
-            <h2>Tier別銘柄入力</h2>
+            <h2 className={styles.stockInputTitle}>Tier別銘柄入力</h2>
 
             {selectedFormation.percentages.map((percentage, index) => {
               const tierNumber = index + 1;
@@ -89,8 +89,8 @@ export default function StockInput() {
                   <div className="tier-header">
                     <h3>Tier {tierNumber}</h3>
                     <div className="tier-info">
-                      <span>Balance: {percentage}%</span>
-                      <span>Estimate: ${targetAmount.toLocaleString()}</span>
+                      <span className="balance-info">{percentage}%</span>
+                      <span className="estimate-info">${targetAmount.toLocaleString()}</span>
                     </div>
                   </div>
 
@@ -162,12 +162,14 @@ export default function StockInput() {
         }
 
         .tier-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
+          display: flex !important;
+          flex-direction: row !important;
+          justify-content: space-between !important;
+          align-items: center !important;
           margin-bottom: 1rem;
           padding-bottom: 0.75rem;
           border-bottom: 1px solid #e2e8f0;
+          width: 100%;
         }
 
         .tier-header h3 {
@@ -175,13 +177,49 @@ export default function StockInput() {
           font-weight: 600;
           color: #2d3748;
           margin: 0;
+          text-align: left;
+          flex: 1;
         }
 
         .tier-info {
-          display: flex;
-          gap: 1rem;
+          display: flex !important;
+          gap: 0.5rem;
+          align-items: center;
+          flex-shrink: 0;
+        }
+
+        .balance-info {
           font-size: 14px;
-          color: #4a5568;
+          font-weight: 600;
+          color: #3b82f6;
+          background: rgba(59, 130, 246, 0.1);
+          padding: 4px 8px;
+          border-radius: 4px;
+        }
+
+        .balance-info::before {
+          content: '[';
+        }
+
+        .balance-info::after {
+          content: ']';
+        }
+
+        .estimate-info {
+          font-size: 14px;
+          font-weight: 600;
+          color: #10b981;
+          background: rgba(16, 185, 129, 0.1);
+          padding: 4px 8px;
+          border-radius: 4px;
+        }
+
+        .estimate-info::before {
+          content: '[';
+        }
+
+        .estimate-info::after {
+          content: ']';
         }
 
         .tier-inputs {
@@ -257,12 +295,23 @@ export default function StockInput() {
           .tier-header {
             flex-direction: column;
             align-items: flex-start;
-            gap: 0.5rem;
+            gap: 0.75rem;
+          }
+
+          .tier-header h3 {
+            width: 100%;
+            text-align: left;
           }
 
           .tier-info {
-            flex-direction: column;
-            gap: 0.25rem;
+            align-self: flex-start;
+            gap: 0.5rem;
+          }
+
+          .balance-info,
+          .estimate-info {
+            font-size: 13px;
+            padding: 3px 6px;
           }
         }
       `}</style>

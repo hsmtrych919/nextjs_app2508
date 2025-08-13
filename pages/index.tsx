@@ -79,20 +79,7 @@ export default function SatelliteInvestmentApp() {
                   ))}
                 </div>
 
-                {selectedFormation && (
-                  <div className={styles.selectedFormation}>
-                    <h3>選択中: {selectedFormation.name}</h3>
-                    <div className={styles.tierInfo}>
-                      {selectedFormation.percentages.map((percentage, index) => (
-                        <div key={index} className={styles.tierItem}>
-                          <span>Tier {index + 1}</span>
-                          <span>{percentage}%</span>
-                          <span>${((budget.funds * percentage) / 100).toLocaleString()}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+
               </div>
             </div>
           </div>
@@ -118,30 +105,28 @@ export default function SatelliteInvestmentApp() {
           </div>
         </section>*/}
 
-        {/* フォーメーション使用統計 */}
-        {formationUsage.length > 0 && (
-          <section className={`${styles.statsSection}`}>
-            <div className={`${gridStyles['row--container']} ${gutterStyles.container}`}>
-              <div className={`${gridStyles['col--12']}`}>
-                <div className={styles.statsCard}>
-                  <h2>フォーメーション使用統計</h2>
-                  <div className={styles.statsList}>
-                    {formationUsage.map((usage) => {
-                      const formation = FORMATION_DEFINITIONS.find(f => f.id === usage.formationId);
-                      return (
-                        <div key={usage.formationId} className={styles.statItem}>
-                          <span>{formation?.name || usage.formationId}</span>
-                          <span>{usage.usagePercentage}%</span>
-                          <span>使用回数: {usage.usageCount}</span>
-                        </div>
-                      );
-                    })}
-                  </div>
+        {/* フォーメーション使用統計 - 常に表示 */}
+        <section className={`${styles.statsSection}`}>
+          <div className={`${gridStyles['row--container']} ${gutterStyles.container}`}>
+            <div className={`${gridStyles['col--12']}`}>
+              <div className={styles.statsCard}>
+                <h2>フォーメーション使用統計</h2>
+                <div className={styles.statsList}>
+                  {FORMATION_DEFINITIONS.map((formation) => {
+                    const usage = formationUsage.find(u => u.formationId === formation.id);
+                    return (
+                      <div key={formation.id} className={styles.statItem}>
+                        <span>{formation.name}</span>
+                        <span>{usage?.usagePercentage || 0}%</span>
+                        <span>使用回数: {usage?.usageCount || 0}</span>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </div>
-          </section>
-        )}
+          </div>
+        </section>
 
         {/* エラー表示 */}
         {error && (
