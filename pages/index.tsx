@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import Layout from '@/components/layout/layout';
 import BudgetManager from '@/components/ui/BudgetManager';
+import FormationSelector from '@/components/ui/FormationSelector';
 import StockInput from '@/components/ui/StockInput';
 import {
   useAppStore,
@@ -19,7 +20,6 @@ export default function SatelliteInvestmentApp() {
     formationUsage,
     isLoading,
     error,
-    setSelectedFormation,
     updateBudget
   } = useAppStore();
 
@@ -37,13 +37,6 @@ export default function SatelliteInvestmentApp() {
       });
     }
   }, [loadDataFromAPI, isInitialized]);
-
-  const handleFormationSelect = async (formationId: string) => {
-    const formation = FORMATION_DEFINITIONS.find(f => f.id === formationId);
-    if (formation) {
-      setSelectedFormation(formation);
-    }
-  };
 
   return (
     <Layout>
@@ -63,23 +56,8 @@ export default function SatelliteInvestmentApp() {
         <section className={`${styles.formationSection}`}>
           <div className={`${gridStyles['row--container']} ${gutterStyles.container}`}>
             <div className={`${gridStyles['col--12']}`}>
-              <div className={styles.formationCard}>
-                <h2>フォーメーション選択</h2>
-                <div className={styles.formationButtons}>
-                  {FORMATION_DEFINITIONS.map((formation) => (
-                    <button
-                      key={formation.id}
-                      onClick={() => handleFormationSelect(formation.id)}
-                      className={`${styles.formationButton} ${
-                        selectedFormation?.id === formation.id ? styles.active : ''
-                      }`}
-                    >
-                      {formation.name}
-                    </button>
-                  ))}
-                </div>
-
-　
+              <div style={{ padding: '1rem 0' }}>
+                <FormationSelector />
               </div>
             </div>
           </div>

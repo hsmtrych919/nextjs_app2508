@@ -45,13 +45,6 @@
   align-items: center;
   gap: 0.8rem;
   margin-bottom: 1rem;
-
-  @media (min-width: 481px) {
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 1rem;
-  }
 }
 
 .apiButton {
@@ -161,6 +154,10 @@
 }
 
 // 予算管理セクション
+.budgetManagerSection {
+  margin-bottom: 1.5rem;
+}
+
 .budgetSection {
   margin-bottom: 1.5rem;
 }
@@ -171,13 +168,8 @@
 
 .budgetGrid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-
-  @media (max-width: 480px) {
-    grid-template-columns: 1fr;
-    gap: 0.8rem;
-  }
+  grid-template-columns: 1fr;
+  gap: 0.8rem;
 }
 
 .budgetItem {
@@ -465,149 +457,439 @@
   }
 }
 
-// レスポンシブ調整
-@media (max-width: 375px) {
-  .satelliteApp {
-    padding-bottom: 1.5rem;
-
-    .header {
-      padding: 1.5rem 0 2.5rem;
-
-      .title {
-        font-size: 1.3rem;
-      }
-
-      .subtitle {
-        font-size: 0.8rem;
-      }
-    }
-
-    .apiControls {
-      margin-top: 1.5rem;
-    }
-
-    .apiButton {
-      min-width: 120px;
-      padding: 0.6rem 0.8rem;
-      font-size: 0.8rem;
-    }
-
-    .budgetGrid {
-      gap: 0.6rem;
-    }
-
-    .budgetItem,
-    .formationButton,
-    .tierItem,
-    .statItem {
-      padding: 0.6rem;
-    }
-
-    .initializingCard {
-      max-width: 260px;
-      padding: 1.5rem 1rem;
-
-      h2 {
-        font-size: 1.1rem;
-      }
-
-      p {
-        font-size: 0.85rem;
-      }
-    }
-  }
-}
-
-// 超小型デバイス対応（320px以下）
-@media (max-width: 320px) {
-  .satelliteApp {
-    .header {
-      padding: 1rem 0 2rem;
-
-      .title {
-        font-size: 1.2rem;
-      }
-
-      .subtitle {
-        font-size: 0.75rem;
-      }
-    }
-
-    .apiButton {
-      min-width: 100px;
-      padding: 0.5rem 0.6rem;
-      font-size: 0.75rem;
-    }
-
-    .budgetItem {
-      padding: 0.5rem;
-
-      label {
-        font-size: 0.75rem;
-      }
-
-      span {
-        font-size: 0.9rem;
-      }
-    }
-
-    .formationButton {
-      padding: 0.8rem;
-      font-size: 0.8rem;
-    }
-
-    .tierItem,
-    .statItem {
-      padding: 0.5rem;
-      font-size: 0.8rem;
-    }
-  }
-}
-
-// 横向きモバイル対応
-@media (max-width: 768px) and (orientation: landscape) {
-  .satelliteApp {
-    .header {
-      padding: 1rem 0 1.5rem;
-
-      .title {
-        margin-bottom: 0.3rem;
-        font-size: 1.3rem;
-      }
-
-      .subtitle {
-        font-size: 0.8rem;
-      }
-    }
-
-    .apiControls {
-      margin-top: 1rem;
-    }
-
-    .controlGroup {
-      flex-direction: row;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-    }
-
-    .initializingSection {
-      align-items: flex-start;
-      padding-top: 10vh;
-    }
-
-    .initializingCard {
-      max-width: 320px;
-      padding: 1.5rem;
-    }
-  }
-}
-
 // Tier別銘柄入力タイトル
 .stockInputTitle {
-  margin-bottom: 2rem;
-  padding-bottom: 0.75rem;
-  border-bottom: 2px solid #e2e8f0;
+  margin-bottom: 1rem;
   color: #2d3748;
   font-size: 1.5rem;
   font-weight: 600;
+}
+
+// FormationSelector コンポーネント
+.formationSelectorWrap {
+  padding: 1rem 0;
+}
+
+.formationSelectorTitle {
+  margin-bottom: 0.5rem;
+  color: g.$black;
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.formationSelectorDescription {
+  margin-top: 0.5rem;
+  color: #6b7280;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.formationSelectorButtonList {
+  margin-top: 1.5rem;
+}
+
+.formationSelectorButton {
+  display: block;
+  width: 100%;
+  margin: 8px 0;
+  padding: 12px 16px;
+  transition: all 0.2s ease;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  background: white;
+  color: #111827;
+  font-size: 16px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover {
+    border-color: #d1d5db;
+    background-color: #f9fafb;
+  }
+
+  &--active {
+    border-color: #3b82f6;
+    background: #3b82f6;
+    color: white;
+
+    &:hover {
+      border-color: #2563eb;
+      background: #2563eb;
+    }
+  }
+}
+
+// StockInput コンポーネント
+.stockInputSection {
+  margin-bottom: 1.5rem;
+}
+
+.stockInputCard {
+  @extend %card-base;
+}
+
+.tierSection {
+  margin-bottom: 1.5rem;
+  padding: 1.5rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.tierHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #e2e8f0;
+
+  h3 {
+    flex: 1;
+    margin: 0;
+    color: #2d3748;
+    font-size: 18px;
+    font-weight: 600;
+    text-align: left;
+  }
+}
+
+.stockTierInfo {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.balanceInfo {
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+  font-size: 14px;
+  font-weight: 600;
+
+}
+
+.estimateInfo {
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+  font-size: 14px;
+  font-weight: 600;
+
+}
+
+.tierInputs {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  align-items: end;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  label {
+    color: #374151;
+    font-size: 14px;
+    font-weight: 500;
+  }
+}
+
+.tickerSelect {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: white;
+  font-size: 14px;
+
+  &:focus {
+    border-color: #3b82f6;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+}
+
+.numberInput {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+
+  &:focus {
+    border-color: #3b82f6;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+}
+
+.goalDisplay {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.goalValue {
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: #e2e8f0;
+  color: #2d3748;
+  font-weight: 500;
+  text-align: center;
+}
+
+// BudgetManager コンポーネント
+.budgetManagerWrap {
+  width: 100%;
+  padding: 1rem 0;
+}
+
+.budgetHeader {
+  margin-bottom: 2rem;
+}
+
+.title--large {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  color: #2d3748;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.titleIcon {
+  color: #667eea;
+}
+
+.headerDescription {
+  margin-top: 0.5rem;
+  color: #6b7280;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.budgetManagerDescription {
+  margin-top: 0.5rem;
+  color: #6b7280;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.budgetForm {
+  padding: 2rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #f8fafc;
+}
+
+.budgetInputGroup {
+  margin-bottom: 2rem;
+}
+
+.budgetInputLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  color: #374151;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.labelIcon {
+  color: #6b7280;
+}
+
+.budgetInputWrapper {
+  display: flex;
+  position: relative;
+  align-items: center;
+}
+
+.budgetInputPrefix {
+  position: absolute;
+  z-index: 1;
+  left: 12px;
+  color: #6b7280;
+  font-weight: 600;
+  pointer-events: none;
+}
+
+.budgetInput {
+  width: 100%;
+  padding: 12px 16px 12px 32px;
+  transition: all 0.2s ease;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  background: white;
+  color: #111827;
+  font-size: 16px;
+  font-weight: 500;
+
+  &:focus {
+    border-color: #3b82f6;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+
+  &::placeholder {
+    color: #9ca3af;
+  }
+}
+
+.fundsInput {
+  border-color: #10b981;
+
+  &:focus {
+    border-color: #059669;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+  }
+}
+
+.startInput {
+  border-color: #3b82f6;
+
+  &:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+}
+
+.profitInput {
+  border-color: #f59e0b;
+
+  &:focus {
+    border-color: #d97706;
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+  }
+}
+
+.budgetInputHelp {
+  margin-top: 0.5rem;
+  color: #6b7280;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.budgetReturnSection {
+  margin: 2rem 0;
+  padding: 1.5rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: white;
+}
+
+.budgetReturnTitle {
+  margin-bottom: 1rem;
+  color: #374151;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.budgetReturnValue {
+  margin-bottom: 0.5rem;
+  color: #059669;
+  font-size: 24px;
+  font-weight: 700;
+
+  &--negative {
+    color: #dc2626;
+  }
+}
+
+.budgetReturnFormula {
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.budgetSummarySection {
+  margin-top: 1.5rem;
+}
+
+.budgetSummaryTitle {
+  margin-bottom: 1rem;
+  color: #374151;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.budgetSummaryGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.8rem;
+}
+
+.budgetSummaryItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: white;
+}
+
+.budgetSummaryLabel {
+  color: #6b7280;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.budgetSummaryValue {
+  color: #111827;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* ====================================
+ * FormationUsage Component Styles
+ * BEM準拠: element--modifier形式
+ * ==================================== */
+
+// 選択済みフォーメーション表示
+.usage--selected {
+  display: inline-block;
+  min-width: 200px;
+  padding: 12px 16px;
+  transition: all 0.2s ease;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  background-color: #eff6ff;
+
+  &:hover {
+    border-color: #93c5fd;
+    background-color: #dbeafe;
+  }
+}
+
+// 未選択時のフォーメーション表示
+.usage--empty {
+  display: inline-block;
+  min-width: 200px;
+  padding: 12px 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background-color: #f8fafc;
+}
+
+// 選択済みフォーメーションのテキスト
+.text--selected {
+  color: #1e40af;
+  font-weight: 600;
+}
+
+// 未選択時のテキスト
+.text--empty {
+  color: #64748b;
+  font-weight: 500;
 }
