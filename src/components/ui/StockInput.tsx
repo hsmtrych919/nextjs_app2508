@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAppStore } from '@/lib/utils/appStore';
-import styles from '@/styles/modules/index.module.scss';
+import styles from '@/styles/modules/stockInput.module.scss';
 import gridStyles from '@/styles/modules/grid.module.scss';
 import gutterStyles from '@/styles/modules/gutter.module.scss';
 
