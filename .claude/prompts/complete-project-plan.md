@@ -83,7 +83,7 @@
 
 ### Phase 2: メイン機能実装【中核機能・2-3日】
 
-#### 2.1 StockInput完全実装
+#### 2.1 StockInput完全実装 済
 **ファイル**: `src/components/ui/StockInput.tsx`（既存大幅修正）
 
 **各Tier表示仕様**:
