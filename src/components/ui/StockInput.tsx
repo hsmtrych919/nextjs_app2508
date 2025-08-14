@@ -1,5 +1,10 @@
 import React, { useState } from 'react';
-import { useAppStore } from '@/lib/utils/appStore';
+import {
+  useSelectedFormation,
+  useBudget,
+  useTiers,
+  useAddStockToTier
+} from '@/lib/utils/appStore';
 import { SATELLITE_TICKERS } from '@/lib/constants/ticker';
 import * as Select from '@radix-ui/react-select';
 import { ChevronDown, ChevronUp } from 'lucide-react';
@@ -8,7 +13,7 @@ import gridStyles from '@/styles/modules/grid.module.scss';
 import gutterStyles from '@/styles/modules/gutter.module.scss';
 
 /**
- * StockInputコンポーネント
+ * StockInputコンポーネント (Phase 3.3 最適化版)
  *
  * Tier別の銘柄入力機能を提供するコンポーネントです。
  * フォーメーション選択の下に内訳コンテンツは表示しません。
@@ -18,11 +23,15 @@ import gutterStyles from '@/styles/modules/gutter.module.scss';
  * - ティッカー選択
  * - Entry価格・Hold株数入力
  * - Goal株数自動計算表示
+ * - Phase 3.3: 自動保存は背景実行
  *
  * @returns StockInputコンポーネント
  */
 export default function StockInput() {
-  const { selectedFormation, budget, tiers, saveHoldingsToAPI } = useAppStore();
+  const selectedFormation = useSelectedFormation();
+  const budget = useBudget();
+  const tiers = useTiers();
+  const addStockToTier = useAddStockToTier();
 
   // 各Tierの入力状態管理
   const [tierInputs, setTierInputs] = useState<{[key: number]: {
@@ -60,11 +69,11 @@ export default function StockInput() {
           goalShares: calculateGoalShares((budget.funds * selectedFormation.percentages[tierIndex]) / 100, parseFloat(tierInput.entryPrice) || 0)
         };
 
-        // 簡潔な自動保存
-        try {
-          saveHoldingsToAPI([holdingData]);
-        } catch (error) {
-          console.error('Auto-save error:', error);
+        // Phase 3.3: 自動保存は背景で実行されるため、手動APIコールは不要
+        // データ更新はaddStockToTierで自動的に保存される
+        const tier = tiers[tierIndex];
+        if (tier) {
+          addStockToTier(tier.id, holdingData);
         }
       }
     }

@@ -1,10 +1,13 @@
 import React from 'react';
-import { useAppStore } from '@/lib/utils/appStore';
+import {
+  useSelectedFormation,
+  useFormationUsage
+} from '@/lib/utils/appStore';
 import styles from '@/styles/modules/index.module.scss';
 import typeStyles from '@/styles/modules/type.module.scss';
 
 /**
- * FormationUsageコンポーネント
+ * FormationUsageコンポーネント (Phase 3.3 最適化版)
  *
  * 選択中のフォーメーションとその使用率をシンプルなテキスト形式で表示します。
  * 「3銘柄 50-30-20%型: XX%」の形式で表示されます。
@@ -22,10 +25,8 @@ import typeStyles from '@/styles/modules/type.module.scss';
  * @returns FormationUsageコンポーネント
  */
 export default function FormationUsage() {
-  const { selectedFormation, getFormationUsagePercentage } = useAppStore(state => ({
-    selectedFormation: state.selectedFormation,
-    getFormationUsagePercentage: state.getFormationUsagePercentage
-  }));
+  const selectedFormation = useSelectedFormation();
+  const formationUsage = useFormationUsage();
 
   // フォーメーション未選択時の表示
   if (!selectedFormation) {
@@ -38,8 +39,9 @@ export default function FormationUsage() {
     );
   }
 
-  // 使用率を取得
-  const usagePercentage = getFormationUsagePercentage(selectedFormation.id);
+  // Phase 3.3: 使用率を直接計算
+  const usage = formationUsage.find((u: any) => u.formationId === selectedFormation.id);
+  const usagePercentage = usage?.usagePercentage || 0;
 
   // 表示テキストの構築
   const formationText = `${selectedFormation.name}: ${usagePercentage}%`;

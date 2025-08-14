@@ -1,25 +1,28 @@
 import React from 'react';
 import * as Select from '@radix-ui/react-select';
 import { ChevronDown } from 'lucide-react';
-import { FORMATION_DEFINITIONS } from '@/lib/constants/types';
-import { useAppStore } from '@/lib/utils/appStore';
+import { FORMATION_DEFINITIONS } from '@/lib/constants/formations';
+import {
+  useSelectedFormation,
+  useSelectFormation
+} from '@/lib/utils/appStore';
 import styles from '@/styles/modules/index.module.scss';
 
 /**
- * FormationSelectorコンポーネント
+ * FormationSelectorコンポーネント (Phase 3.3 最適化版)
  *
  * Radix UI Selectを使用したフォーメーション選択コンポーネント
  * 5つのフォーメーション選択肢を提供し、選択時にZustandストア更新
  * 下部Tier数の動的変更に対応
  */
 export default function FormationSelector() {
-  const selectedFormation = useAppStore(state => state.selectedFormation);
-  const setSelectedFormation = useAppStore(state => state.setSelectedFormation);
+  const selectedFormation = useSelectedFormation();
+  const selectFormation = useSelectFormation();
 
   const handleFormationSelect = (formationId: string) => {
-    const formation = FORMATION_DEFINITIONS.find(f => f.id === formationId);
+    const formation = FORMATION_DEFINITIONS.find((f: any) => f.id === formationId);
     if (formation) {
-      setSelectedFormation(formation);
+      selectFormation(formation);
     }
   };
 
