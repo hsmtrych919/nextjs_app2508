@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAppStore } from '@/lib/utils/appStore';
+import { SATELLITE_TICKERS } from '@/lib/constants/ticker';
 import * as Select from '@radix-ui/react-select';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import styles from '@/styles/modules/stockInput.module.scss';
@@ -88,14 +89,6 @@ export default function StockInput() {
     );
   }
 
-  // サテライト銘柄リスト（21銘柄）
-  const satelliteTickers = [
-    'NVDA', 'TSLA', 'AMD', 'PLTR', 'RKLB',
-    'SOFI', 'HOOD', 'COIN', 'NET', 'ROKU',
-    'SQ', 'PYPL', 'SHOP', 'UBER', 'LYFT',
-    'SNAP', 'TWTR', 'PINS', 'ZM', 'DOCU', 'CRM'
-  ];
-
   return (
     <section className={`${styles['stock-input--section']}`}>
       <div className={`${gridStyles['row--container']} ${gutterStyles.container}`}>
@@ -142,7 +135,7 @@ export default function StockInput() {
                               </Select.ScrollUpButton>
 
                               <Select.Viewport className={styles['select--viewport']}>
-                                {satelliteTickers.map(ticker => (
+                                {SATELLITE_TICKERS.map(ticker => (
                                   <Select.Item key={ticker} value={ticker} className={styles['select--item']}>
                                     <Select.ItemText>{ticker}</Select.ItemText>
                                   </Select.Item>
