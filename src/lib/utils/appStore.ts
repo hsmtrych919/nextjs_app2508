@@ -131,6 +131,8 @@ export const useAppStore = create<AppStore>()(
 
           // フォーメーション使用統計を更新
           get().updateFormationUsage(formation.id);
+          // 自動保存実行
+          get().saveDataToAPI();
         },
 
         clearFormation: () => {
@@ -158,6 +160,8 @@ export const useAppStore = create<AppStore>()(
                 : tier
             )
           }));
+          // 自動保存実行
+          get().saveDataToAPI();
         },
 
         updateStockInTier: (tierId, stockId, updates) => {
@@ -173,6 +177,8 @@ export const useAppStore = create<AppStore>()(
                 : tier
             )
           }));
+          // 自動保存実行
+          get().saveDataToAPI();
         },
 
         removeStockFromTier: (tierId, stockId) => {
@@ -183,6 +189,8 @@ export const useAppStore = create<AppStore>()(
                 : tier
             )
           }));
+          // 自動保存実行
+          get().saveDataToAPI();
         },
 
         // 予算管理
@@ -204,6 +212,8 @@ export const useAppStore = create<AppStore>()(
               tiers: updatedTiers
             };
           });
+          // 自動保存実行
+          get().saveDataToAPI();
         },
 
         calculateBudgetMetrics: () => {
