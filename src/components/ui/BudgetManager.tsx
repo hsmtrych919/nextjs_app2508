@@ -11,7 +11,7 @@
 
 import { useState } from 'react';
 import { DollarSign, TrendingUp, Calculator } from 'lucide-react';
-import styles from '../../styles/modules/index.module.scss';
+import styles from '../../styles/modules/budgetManager.module.scss';
 
 export default function BudgetManager() {
   const [funds, setFunds] = useState<number>(0);
