@@ -69,7 +69,7 @@
 - フルポジ: 表示のみ
 - ノーポジ: 表示のみ
 
-#### 1.3 BudgetManager機能拡張 ✅
+#### 1.3 BudgetManager機能拡張 ✅ 済
 **ファイル**: `src/components/ui/BudgetManager.tsx`（既存修正）
 
 **追加機能**:
@@ -103,7 +103,7 @@ Tier X (xx% - $x,xxx)
 - 入力時即座自動保存
 
 **ティッカー選択肢**:
-21銘柄（AMZN, AVGO, COIN, CRM, CRWD, GOOGL, META, MSFT, NFLX, NVDA, ORCL, PLTR, PYPL, SHOP, SNOW, SQ, TSLA, UBER, V, WDAY, ZM）
+すでに設定済の内容利用
 
 #### 2.2 動的Tier生成
 **フォーメーション連動仕様**:

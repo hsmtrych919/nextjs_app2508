@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useAppStore } from '@/lib/utils/appStore';
+import * as Select from '@radix-ui/react-select';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 import styles from '@/styles/modules/stockInput.module.scss';
 import gridStyles from '@/styles/modules/grid.module.scss';
 import gutterStyles from '@/styles/modules/gutter.module.scss';
@@ -19,7 +21,7 @@ import gutterStyles from '@/styles/modules/gutter.module.scss';
  * @returns StockInputコンポーネント
  */
 export default function StockInput() {
-  const { selectedFormation, budget } = useAppStore();
+  const { selectedFormation, budget, tiers, saveHoldingsToAPI } = useAppStore();
 
   // 各Tierの入力状態管理
   const [tierInputs, setTierInputs] = useState<{[key: number]: {
@@ -34,15 +36,37 @@ export default function StockInput() {
     return Math.round(targetAmount / price);
   };
 
-  // Tier入力値更新
+  // Tier入力値更新と自動保存
   const updateTierInput = (tierIndex: number, field: string, value: string) => {
-    setTierInputs(prev => ({
-      ...prev,
+    const newInputs = {
+      ...tierInputs,
       [tierIndex]: {
-        ...prev[tierIndex],
+        ...tierInputs[tierIndex],
         [field]: value
       }
-    }));
+    };
+    setTierInputs(newInputs);
+
+    // 自動保存（基本的なデータ更新のみ）
+    if (selectedFormation) {
+      const tierInput = newInputs[tierIndex];
+      if (tierInput && tierInput.ticker) {
+        const holdingData = {
+          id: `tier-${tierIndex + 1}`,
+          ticker: tierInput.ticker,
+          entryPrice: parseFloat(tierInput.entryPrice) || 0,
+          holdShares: parseInt(tierInput.holdShares) || 0,
+          goalShares: calculateGoalShares((budget.funds * selectedFormation.percentages[tierIndex]) / 100, parseFloat(tierInput.entryPrice) || 0)
+        };
+
+        // 簡潔な自動保存
+        try {
+          saveHoldingsToAPI([holdingData]);
+        } catch (error) {
+          console.error('Auto-save error:', error);
+        }
+      }
+    }
   };
 
   // Tier入力値取得
@@ -64,10 +88,12 @@ export default function StockInput() {
     );
   }
 
-  // サテライト銘柄リスト
+  // サテライト銘柄リスト（21銘柄）
   const satelliteTickers = [
     'NVDA', 'TSLA', 'AMD', 'PLTR', 'RKLB',
-    'SOFI', 'HOOD', 'COIN', 'NET', 'ROKU'
+    'SOFI', 'HOOD', 'COIN', 'NET', 'ROKU',
+    'SQ', 'PYPL', 'SHOP', 'UBER', 'LYFT',
+    'SNAP', 'TWTR', 'PINS', 'ZM', 'DOCU', 'CRM'
   ];
 
   return (
@@ -93,55 +119,80 @@ export default function StockInput() {
                     </div>
                   </div>
 
-                  <div className={styles['tier--inputs']}>
-                    {/* ティッカー選択 */}
-                    <div className={styles['input--group']}>
-                      <label>Ticker</label>
-                      <select
-                        value={tierInput.ticker}
-                        onChange={(e) => updateTierInput(index, 'ticker', e.target.value)}
-                        className={styles['ticker--select']}
-                      >
-                        <option value="">銘柄を選択</option>
-                        {satelliteTickers.map(ticker => (
-                          <option key={ticker} value={ticker}>{ticker}</option>
-                        ))}
-                      </select>
-                    </div>
+                  <div className={styles['tier--content']}>
+                    <div className={styles['tier--inputs']}>
+                      {/* ティッカー選択 */}
+                      <div className={styles['input--group']}>
+                        <label>Ticker</label>
+                        <Select.Root
+                          value={tierInput.ticker}
+                          onValueChange={(value) => updateTierInput(index, 'ticker', value)}
+                        >
+                          <Select.Trigger className={styles['ticker--select']}>
+                            <Select.Value placeholder="銘柄を選択" />
+                            <Select.Icon>
+                              <ChevronDown size={16} />
+                            </Select.Icon>
+                          </Select.Trigger>
 
-                    {/* Entry価格入力 */}
-                    <div className={styles['input--group']}>
-                      <label>Entry</label>
-                      <input
-                        type="number"
-                        value={tierInput.entryPrice}
-                        onChange={(e) => updateTierInput(index, 'entryPrice', e.target.value)}
-                        placeholder="0.00"
-                        step="0.01"
-                        min="0"
-                        className={styles['number--input']}
-                      />
-                    </div>
+                          <Select.Portal>
+                            <Select.Content className={styles['select--content']}>
+                              <Select.ScrollUpButton>
+                                <ChevronUp size={16} />
+                              </Select.ScrollUpButton>
 
-                    {/* Hold株数入力 */}
-                    <div className={styles['input--group']}>
-                      <label>Hold</label>
-                      <input
-                        type="number"
-                        value={tierInput.holdShares}
-                        onChange={(e) => updateTierInput(index, 'holdShares', e.target.value)}
-                        placeholder="0"
-                        min="0"
-                        className={styles['number--input']}
-                      />
-                    </div>
+                              <Select.Viewport className={styles['select--viewport']}>
+                                {satelliteTickers.map(ticker => (
+                                  <Select.Item key={ticker} value={ticker} className={styles['select--item']}>
+                                    <Select.ItemText>{ticker}</Select.ItemText>
+                                  </Select.Item>
+                                ))}
+                              </Select.Viewport>
 
-                    {/* Goal株数表示 */}
-                    <div className={styles['goal--display']}>
-                      <label>Hold/Goal</label>
-                      <span className={styles['goal--value']}>
-                        {tierInput.holdShares || 0}/{goalShares}
-                      </span>
+                              <Select.ScrollDownButton>
+                                <ChevronDown size={16} />
+                              </Select.ScrollDownButton>
+                            </Select.Content>
+                          </Select.Portal>
+                        </Select.Root>
+                      </div>
+
+                      {/* Entry価格入力 */}
+                      <div className={styles['input--group']}>
+                        <label>Entry</label>
+                        <input
+                          type="number"
+                          inputMode="decimal"
+                          value={tierInput.entryPrice}
+                          onChange={(e) => updateTierInput(index, 'entryPrice', e.target.value)}
+                          placeholder="0.00"
+                          step="0.01"
+                          min="0"
+                          className={styles['number--input']}
+                        />
+                      </div>
+
+                      {/* Hold株数入力 */}
+                      <div className={styles['input--group']}>
+                        <label>Hold</label>
+                        <input
+                          type="number"
+                          inputMode="numeric"
+                          value={tierInput.holdShares}
+                          onChange={(e) => updateTierInput(index, 'holdShares', e.target.value)}
+                          placeholder="0"
+                          min="0"
+                          className={styles['number--input']}
+                        />
+                      </div>
+
+                      {/* Hold/Goal表示 */}
+                      <div className={styles['goal--display']}>
+                        <label>Hold/Goal</label>
+                        <span className={styles['goal--value']}>
+                          {tierInput.holdShares || 0}/{goalShares}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
