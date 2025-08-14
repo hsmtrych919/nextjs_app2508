@@ -1,5 +1,6 @@
 import React from 'react';
 import * as Select from '@radix-ui/react-select';
+import { ChevronDown } from 'lucide-react';
 import { FORMATION_DEFINITIONS } from '@/lib/constants/types';
 import { useAppStore } from '@/lib/utils/appStore';
 import styles from '@/styles/modules/index.module.scss';
@@ -23,36 +24,36 @@ export default function FormationSelector() {
   };
 
   return (
-    <div className={styles.formationSelectorWrap}>
-      <h2 className={styles.formationSelectorTitle}>フォーメーション選択</h2>
-      <p className={styles.formationSelectorDescription}>
-        投資戦略のフォーメーションを選択してください。
+    <div className={styles['formation-selector--wrap']}>
+      <h2 className={styles['formation-selector--title']}>フォーメーション選択</h2>
+      <p className={styles['formation-selector--description']}>
+        投資戦略に応じてフォーメーションを選択してください。各フォーメーションは異なる資金配分比率を持ちます。
       </p>
 
-      <Select.Root
-        value={selectedFormation?.id || ''}
-        onValueChange={handleFormationSelect}
-      >
-        <Select.Trigger className={styles.formationSelectTrigger}>
-          <Select.Value placeholder="フォーメーションを選択してください" />
-          <Select.Icon className={styles.formationSelectIcon}>
-            ▼
+      {/* Radix UI Select */}
+      <Select.Root value={selectedFormation?.id || ''} onValueChange={handleFormationSelect}>
+        <Select.Trigger className={styles['formation-select--trigger']}>
+          <Select.Value placeholder="フォーメーションを選択" />
+          <Select.Icon className={styles['formation-select--icon']}>
+            <ChevronDown />
           </Select.Icon>
         </Select.Trigger>
 
         <Select.Portal>
-          <Select.Content className={styles.formationSelectContent}>
-            <Select.Viewport className={styles.formationSelectViewport}>
+          <Select.Content className={styles['formation-select--content']}>
+            <Select.Viewport className={styles['formation-select--viewport']}>
               {FORMATION_DEFINITIONS.map((formation) => (
                 <Select.Item
                   key={formation.id}
                   value={formation.id}
-                  className={styles.formationSelectItem}
+                  className={styles['formation-select--item']}
                 >
-                  <Select.ItemText>{formation.name}</Select.ItemText>
-                  <Select.ItemIndicator className={styles.formationSelectIndicator}>
+                  <Select.ItemIndicator className={styles['formation-select--indicator']}>
                     ✓
                   </Select.ItemIndicator>
+                  <Select.ItemText>
+                    {formation.name} ({formation.percentages.join(', ')}%)
+                  </Select.ItemText>
                 </Select.Item>
               ))}
             </Select.Viewport>

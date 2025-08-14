@@ -60,6 +60,14 @@ CSS Modules環境では、ファイル名がBlock役割を担うため、内部�
 _[機能名].scss
 ```
 
+**重要**: グローバルSCSSファイルは **必ずアンダースコア（_）で始まる** パーシャルファイルとして作成すること。
+
+#### パーシャルファイルの必要性
+- SassコンパイラがCSS出力対象から除外
+- importやuseでのみ読み込まれる設計
+- ビルド時の不要ファイル生成を防止
+- プロジェクトの層構造との整合性確保
+
 #### ディレクトリ別分類
 
 **Foundation層（基盤・リセット）**
@@ -227,7 +235,7 @@ breakpoint-infix($bp)           // -sm（一般用）
 // grid.module.scss内での使用例
 @each $breakpoint in map.keys($breakpoints) {
   $infix: g.breakpoint-infix-modifier($breakpoint, $breakpoints);
-  
+
   @if $infix != "" {
     .col#{$infix}-#{$i} {    // .col--sm-6 のような出力
       // スタイル定義
