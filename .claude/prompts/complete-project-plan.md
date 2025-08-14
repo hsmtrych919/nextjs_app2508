@@ -53,7 +53,7 @@
 4. BudgetManager統合
 5. シンプルUsage表示
 
-#### 1.2 FormationSelector新規作成
+#### 1.2 FormationSelector新規作成 済
 **ファイル**: `src/components/ui/FormationSelector.tsx`
 
 **仕様**:
@@ -69,15 +69,17 @@
 - フルポジ: 表示のみ
 - ノーポジ: 表示のみ
 
-#### 1.3 BudgetManager機能拡張
+#### 1.3 BudgetManager機能拡張 ✅
 **ファイル**: `src/components/ui/BudgetManager.tsx`（既存修正）
 
 **追加機能**:
-- Funds入力（デフォルト6000、変更可能）
-- Start金額入力
-- Profit金額入力
-- Return%自動計算表示
-- 即座自動保存対応
+- ✅ Funds入力（デフォルト6000、変更可能）
+- ✅ Start金額入力
+- ✅ Profit金額入力
+- ✅ Return%自動計算表示（常時表示）
+- ❌ 即座自動保存対応
+- ✅ 予算概要削除（重複情報のため不要）
+- ✅ 利回り表示の常時表示化
 
 ### Phase 2: メイン機能実装【中核機能・2-3日】
 

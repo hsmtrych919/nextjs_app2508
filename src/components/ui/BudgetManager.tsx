@@ -14,7 +14,7 @@ import { DollarSign, TrendingUp, Calculator } from 'lucide-react';
 import styles from '../../styles/modules/budgetManager.module.scss';
 
 export default function BudgetManager() {
-  const [funds, setFunds] = useState<number>(0);
+  const [funds, setFunds] = useState<number>(6000);
   const [start, setStart] = useState<number>(0);
   const [profit, setProfit] = useState<number>(0);
 
@@ -98,50 +98,25 @@ export default function BudgetManager() {
           </p>
         </div>
 
-        {/* 利回り表示 */}
-        {start > 0 && (
-          <div className={styles['budget-return--section']}>
-            <div className={styles.budgetReturnCard}>
-              <div className={styles.budgetReturnHeader}>
-                <h3 className={styles['budget-return--title']}>現在の利回り</h3>
-              </div>
-              <div className={`${styles['budget-return--value']} ${returnPercentage < 0 ? styles.negative : ''}`}>
-                {returnPercentage >= 0 ? '+' : ''}{returnPercentage.toFixed(2)}%
-              </div>
-              <div className={styles.budgetReturnCalc}>
-                <p className={styles.calcFormula}>
-                  計算式: ({profit.toLocaleString()} ÷ {start.toLocaleString()}) × 100
-                </p>
-                <p className={styles.calcNote}>
-                  ※ 利回り = (現在利益 ÷ 開始元本) × 100
-                </p>
-              </div>
+        {/* 利回り表示 - 常時表示 */}
+        <div className={styles['budget-return--section']}>
+          <div className={styles.budgetReturnCard}>
+            <div className={styles.budgetReturnHeader}>
+              <h3 className={styles['budget-return--title']}>現在の利回り</h3>
+            </div>
+            <div className={`${styles['budget-return--value']} ${returnPercentage < 0 ? styles.negative : ''}`}>
+              {returnPercentage >= 0 ? '+' : ''}{returnPercentage.toFixed(2)}%
+            </div>
+            <div className={styles.budgetReturnCalc}>
+              <p className={styles.calcFormula}>
+                計算式: ({profit.toLocaleString()} ÷ {start.toLocaleString()}) × 100
+              </p>
+              <p className={styles.calcNote}>
+                ※ 利回り = (現在利益 ÷ 開始元本) × 100
+              </p>
             </div>
           </div>
-        )}
-
-        {/* 予算概要 */}
-        {funds > 0 && (
-          <div className={styles['budget-summary--section']}>
-            <h3 className={styles['budget-summary--title']}>予算概要</h3>
-            <div className={styles['budget-summary--grid']}>
-              <div className={styles['budget-summary--item']}>
-                <span className={styles['budget-summary--label']}>総予算</span>
-                <span className={styles['budget-summary--value']}>${funds.toLocaleString()}</span>
-              </div>
-              <div className={styles['budget-summary--item']}>
-                <span className={styles['budget-summary--label']}>開始元本</span>
-                <span className={styles['budget-summary--value']}>${start.toLocaleString()}</span>
-              </div>
-              <div className={styles['budget-summary--item']}>
-                <span className={styles['budget-summary--label']}>現在利益</span>
-                <span className={styles['budget-summary--value']}>
-                  ${profit >= 0 ? '+' : ''}${profit.toLocaleString()}
-                </span>
-              </div>
-            </div>
-          </div>
-        )}
+        </div>
       </div>
     </div>
   );
