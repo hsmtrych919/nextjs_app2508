@@ -1,32 +1,27 @@
-import { useEffect } from 'react';
+import { } from 'react';
 import Layout from '@/components/layout/layout';
 import BudgetManager from '@/components/ui/BudgetManager';
 import FormationSelector from '@/components/ui/FormationSelector';
 import StockInput from '@/components/ui/StockInput';
 import {
-  useAppStore,
-  useLoadDataFromAPI
+  useSelectedFormation,
+  useTiers,
+  useBudget,
+  useFormationUsage
 } from '@/lib/utils/appStore';
-import { FORMATION_DEFINITIONS } from '@/lib/constants/types';
+import { FORMATION_DEFINITIONS } from '@/lib/constants/formations';
 import styles from '@/styles/modules/index.module.scss';
 import gridStyles from '@/styles/modules/grid.module.scss';
-import gutterStyles from '@/styles/modules/gutter.module.scss';// ファイル下に meta情報用の getStaticProps記載
+import gutterStyles from '@/styles/modules/gutter.module.scss';
 
 export default function SatelliteInvestmentApp() {
-  const {
-    selectedFormation,
-    tiers,
-    budget,
-    formationUsage
-  } = useAppStore();
+  // Phase 3.3: 最適化されたhookを使用
+  const selectedFormation = useSelectedFormation();
+  const tiers = useTiers();
+  const budget = useBudget();
+  const formationUsage = useFormationUsage();
 
-  // 初期データ読み込み（バックグラウンド処理）
-  const loadDataFromAPI = useLoadDataFromAPI();
-
-  // 初期データ読み込み（バックグラウンド処理）
-  useEffect(() => {
-    loadDataFromAPI();
-  }, [loadDataFromAPI]);
+  // Phase 3.3: 自動保存は背景で実行されるため、手動読み込みは不要
 
   return (
     <Layout>
@@ -67,7 +62,7 @@ export default function SatelliteInvestmentApp() {
                 <h2>フォーメーション使用統計</h2>
                 <div className={styles['stats--list']}>
                   {FORMATION_DEFINITIONS.map((formation) => {
-                    const usage = formationUsage.find(u => u.formationId === formation.id);
+                    const usage = formationUsage.find((u: any) => u.formationId === formation.id);
                     return (
                       <div key={formation.id} className={styles['stat--item']}>
                         <span>{formation.name}</span>

@@ -332,7 +332,7 @@ export const useAppStore = create<AppStore>()(
 
 // フォーメーション定義を取得するセレクタ関数
 export const getFormationById = (id: string): FormationType | undefined => {
-  return FORMATION_DEFINITIONS.find((formation: FormationType) => formation.id === id);
+  return FORMATION_DEFINITIONS.find(formation => formation.id === id);
 };
 
 // Phase 3.3: 最適化されたhook（UI必要な状態のみ公開）
