@@ -42,38 +42,24 @@ export default function SatelliteInvestmentApp() {
           </div>
         </section>
 
-        {/* フォーメーション選択セクション（位置変更：上部に移動） */}
+        {/* 1. フォーメーション選択（FormationSelector） */}
         <section className={`${styles.formationSection}`}>
           <div className={`${gridStyles['row--container']} ${gutterStyles.container}`}>
             <div className={`${gridStyles['col--12']}`}>
-              <div style={{ padding: '1rem 0' }}>
-                <FormationSelector />
-              </div>
+              <FormationSelector />
             </div>
           </div>
         </section>
 
-        {/* Tier別銘柄入力セクション */}
+        {/* 2. Tier別銘柄入力セクション（StockInput - 動的表示） */}
         {selectedFormation && (
-          <section className={`${styles.stockInputSection}`}>
-            <div className={`${gridStyles['row--container']} ${gutterStyles.container}`}>
-              <div className={`${gridStyles['col--12']}`}>
-                <StockInput />
-              </div>
-            </div>
-          </section>
+          <StockInput />
         )}
 
-        {/* 予算管理セクション */}
-        <section className={`${styles.budgetManagerSection}`}>
-          <div className={`${gridStyles['row--container']} ${gutterStyles.container}`}>
-            <div className={`${gridStyles['col--12']}`}>
-              <BudgetManager />
-            </div>
-          </div>
-        </section>
+        {/* 3. 予算管理エリア（BudgetManager - 入力可能） */}
+        <BudgetManager />
 
-        {/* フォーメーション使用統計 - 常に表示 */}
+        {/* 4. Formation Usage表示（シンプルテキスト） */}
         <section className={`${styles.statsSection}`}>
           <div className={`${gridStyles['row--container']} ${gutterStyles.container}`}>
             <div className={`${gridStyles['col--12']}`}>

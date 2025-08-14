@@ -5,15 +5,14 @@ import gridStyles from '@/styles/modules/grid.module.scss';
 import gutterStyles from '@/styles/modules/gutter.module.scss';
 
 /**
- * StockInputコンポーネント（簡略化版）
+ * StockInputコンポーネント
  *
- * Tier別の銘柄入力機能を提供するシンプルなコンポーネントです。
- * React #185エラーを回避するため、複雑なRadix UIを削減し、
- * 基本的なHTMLエレメントで構築しています。
+ * Tier別の銘柄入力機能を提供するコンポーネントです。
+ * フォーメーション選択の下に内訳コンテンツは表示しません。
  *
  * 主な機能:
- * - Tier表示
- * - 基本的なティッカー選択（selectエレメント）
+ * - Tier表示（詳細情報付き）
+ * - ティッカー選択
  * - Entry価格・Hold株数入力
  * - Goal株数自動計算表示
  *
@@ -65,7 +64,7 @@ export default function StockInput() {
     );
   }
 
-  // サテライト銘柄リスト（簡略版）
+  // サテライト銘柄リスト
   const satelliteTickers = [
     'NVDA', 'TSLA', 'AMD', 'PLTR', 'RKLB',
     'SOFI', 'HOOD', 'COIN', 'NET', 'ROKU'
@@ -88,9 +87,9 @@ export default function StockInput() {
                 <div key={tierNumber} className={styles.tierSection}>
                   <div className={styles.tierHeader}>
                     <h3>Tier {tierNumber}</h3>
-                    <div className={styles.stockTierInfo}>
-                      <span className={styles.balanceInfo}>{percentage}%</span>
-                      <span className={styles.estimateInfo}>${targetAmount.toLocaleString()}</span>
+                    <div className={styles.tierDetails}>
+                      <span className={styles.tierPercentage}>{percentage}%</span>
+                      <span className={styles.tierAmount}>${targetAmount.toLocaleString()}</span>
                     </div>
                   </div>
 
