@@ -9,14 +9,41 @@
  * - 予算概要の表示
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { DollarSign, TrendingUp, Calculator } from 'lucide-react';
+import { useAppStore } from '@/lib/utils/appStore';
 import styles from '../../styles/modules/budgetManager.module.scss';
 
 export default function BudgetManager() {
-  const [funds, setFunds] = useState<number>(6000);
-  const [start, setStart] = useState<number>(0);
-  const [profit, setProfit] = useState<number>(0);
+  const { budget, updateBudget } = useAppStore();
+
+  // ローカル状態をZustandストアで初期化
+  const [funds, setFunds] = useState<number>(budget.funds || 6000);
+  const [start, setStart] = useState<number>(budget.start || 0);
+  const [profit, setProfit] = useState<number>(budget.profit || 0);
+
+  // ストアの値が変更されたらローカル状態を同期
+  useEffect(() => {
+    setFunds(budget.funds || 6000);
+    setStart(budget.start || 0);
+    setProfit(budget.profit || 0);
+  }, [budget.funds, budget.start, budget.profit]);
+
+  // 値変更時の自動保存ハンドラー
+  const handleFundsChange = (value: number) => {
+    setFunds(value);
+    updateBudget({ funds: value });
+  };
+
+  const handleStartChange = (value: number) => {
+    setStart(value);
+    updateBudget({ start: value });
+  };
+
+  const handleProfitChange = (value: number) => {
+    setProfit(value);
+    updateBudget({ profit: value });
+  };
 
   // 利回り計算: (現在利益 / 開始元本) × 100
   const returnPercentage = start > 0 ? ((profit / start) * 100) : 0;
@@ -46,7 +73,7 @@ export default function BudgetManager() {
             <input
               type="number"
               value={funds || ''}
-              onChange={(e) => setFunds(Number(e.target.value) || 0)}
+              onChange={(e) => handleFundsChange(Number(e.target.value) || 0)}
               placeholder="投資に使用する総予算を入力"
               className={`${styles['budget--input']} ${styles['funds--input']}`}
             />
@@ -67,7 +94,7 @@ export default function BudgetManager() {
             <input
               type="number"
               value={start || ''}
-              onChange={(e) => setStart(Number(e.target.value) || 0)}
+              onChange={(e) => handleStartChange(Number(e.target.value) || 0)}
               placeholder="投資開始時の元本を入力"
               className={`${styles['budget--input']} ${styles['start--input']}`}
             />
@@ -88,7 +115,7 @@ export default function BudgetManager() {
             <input
               type="number"
               value={profit || ''}
-              onChange={(e) => setProfit(Number(e.target.value) || 0)}
+              onChange={(e) => handleProfitChange(Number(e.target.value) || 0)}
               placeholder="現在の利益または損失を入力"
               className={`${styles['budget--input']} ${styles['profit--input']}`}
             />
