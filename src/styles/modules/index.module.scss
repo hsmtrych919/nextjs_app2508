@@ -4,7 +4,7 @@
 
 // サテライト投資アプリ モバイル専用スタイル
 
-.satelliteApp {
+.app {
   min-height: 100vh;
   padding-bottom: 2rem;
   background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
@@ -13,13 +13,11 @@
 
 // ヘッダーセクション
 .header {
-  margin-bottom: 1rem;
   padding: 2rem 0 3rem;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
 
   .title {
-    margin-bottom: 0.5rem;
     font-size: 1.5rem;
     font-weight: 700;
     text-align: center;
@@ -27,6 +25,7 @@
 
   .subtitle {
     margin: 0;
+    margin-top: 0.5rem;
     opacity: 0.9;
     font-size: 0.9rem;
     text-align: center;
@@ -34,20 +33,19 @@
 }
 
 // API連携コントロール
-.apiControls {
-  margin-top: 2rem;
+.api--controls {
+  margin-top: 1rem;
   text-align: center;
 }
 
-.controlGroup {
+.control--group {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.8rem;
-  margin-bottom: 1rem;
 }
 
-.apiButton {
+.api--button {
   min-width: 140px;
   padding: 0.75rem 1rem;
   transition: all 0.2s ease;
@@ -72,33 +70,22 @@
   }
 }
 
-.loadButton {
-  &:hover:not(:disabled) {
-    border-color: rgba(52, 152, 219, 0.6);
-    background: rgba(52, 152, 219, 0.3);
-  }
+.load--button {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: white;
 }
 
-.saveButton {
-  &:hover:not(:disabled) {
-    border-color: rgba(46, 204, 113, 0.6);
-    background: rgba(46, 204, 113, 0.3);
-  }
+.save--button {
+  background: linear-gradient(135deg, #007bff 0%, #6f42c1 100%);
+  color: white;
 }
 
-.autoSaveButton {
-  &.active {
-    border-color: rgba(46, 204, 113, 0.8);
-    background: rgba(46, 204, 113, 0.4);
-  }
-
-  &:hover:not(:disabled) {
-    border-color: rgba(155, 89, 182, 0.6);
-    background: rgba(155, 89, 182, 0.3);
-  }
+.auto-save--button {
+  background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+  color: white;
 }
 
-.saveStatus {
+.save--status {
   padding: 0.5rem 1rem;
   border-radius: 6px;
   font-size: 0.8rem;
@@ -126,11 +113,10 @@
 // カード共通スタイル
 %card-base {
   position: relative;
-  margin-bottom: 1rem;
-  padding: 1.5rem;
+  padding: 1.5rem var(--gutter-row);
   transition: all 0.2s ease;
   border: 1px solid rgba(255, 255, 255, 0.8);
-  border-radius: 16px;
+  border-radius: 8px;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
   box-shadow:
@@ -145,7 +131,6 @@
   }
 
   h2 {
-    margin-bottom: 1rem;
     color: g.$black;
     font-size: 1.1rem;
     font-weight: 600;
@@ -154,25 +139,26 @@
 }
 
 // 予算管理セクション
-.budgetManagerSection {
-  margin-bottom: 1.5rem;
+.budget-manager--section {
+  margin-top: 1rem;
 }
 
-.budgetSection {
-  margin-bottom: 1.5rem;
+.budget--section {
+  margin-top: 1.5rem;
 }
 
-.budgetCard {
+.budget--card {
   @extend %card-base;
+  margin-top: 1rem;
 }
 
-.budgetGrid {
+.budget--grid {
   display: grid;
   grid-template-columns: 1fr;
   gap: 0.8rem;
 }
 
-.budgetItem {
+.budget--item {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -181,12 +167,12 @@
   border-radius: 8px;
 
   label {
-    margin-bottom: 0.3rem;
     color: g.$clrg400;
     font-size: 0.8rem;
   }
 
   span {
+    margin-top: 0.3rem;
     color: g.$black;
     font-size: 1rem;
     font-weight: 600;
@@ -202,22 +188,22 @@
 }
 
 // フォーメーション選択セクション
-.formationSection {
-  margin-bottom: 1.5rem;
+.formation--section {
+  margin-top: 1.5rem;
 }
 
-.formationCard {
+.formation--card {
   @extend %card-base;
+  margin-top: 1rem;
 }
 
-.formationButtons {
+.formation--buttons {
   display: flex;
   flex-direction: column;
   gap: 0.8rem;
-  margin-bottom: 1rem;
 }
 
-.formationButton {
+.formation--button {
   position: relative;
   width: 100%;
   padding: 1rem;
@@ -267,68 +253,45 @@
   }
 }
 
-.selectedFormation {
-  margin-top: 1rem;
+.formation--selected {
   padding: 1rem;
   border: 1px solid #e1e5e9;
   border-radius: 8px;
   background: #f8f9ff;
 
   h3 {
-    margin-bottom: 0.8rem;
     color: g.$black;
     font-size: 1rem;
     font-weight: 600;
   }
 }
 
-.tierInfo {
+.tier--info {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 
-.tierItem {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.6rem 0.8rem;
-  border-radius: 6px;
-  background: white;
-  font-size: 0.85rem;
-
-  span:first-child {
-    color: g.$black;
-    font-weight: 500;
-  }
-
-  span:nth-child(2) {
-    color: #667eea;
-    font-weight: 600;
-  }
-
-  span:last-child {
-    color: g.$black;
-    font-weight: 600;
-  }
+.tier--item {
+  // TODO: tier--itemのスタイルを追加
 }
 
 // 統計セクション
-.statsSection {
-  margin-bottom: 1.5rem;
+.stats--section {
+  margin-top: 2.5rem;
 }
 
-.statsCard {
+.stats--card {
   @extend %card-base;
 }
 
-.statsList {
+.stats--list {
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
 }
 
-.statItem {
+.stat--item {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -358,12 +321,13 @@
 // エラー・ローディングセクション
 .errorSection,
 .loadingSection {
-  margin-bottom: 1rem;
+  margin-top: 1rem;
 }
 
 .errorCard,
 .loadingCard {
   @extend %card-base;
+  margin-top: 1rem;
   text-align: center;
 }
 
@@ -390,7 +354,7 @@
 }
 
 // 初期化中オーバーレイ
-.initializingSection {
+.initializing--section {
   display: flex;
   position: fixed;
   z-index: 1000;
@@ -404,7 +368,7 @@
   backdrop-filter: blur(5px);
 }
 
-.initializingCard {
+.initializing--card {
   max-width: 280px;
   padding: 2rem 1.5rem;
   border-radius: 16px;
@@ -413,14 +377,14 @@
   text-align: center;
 
   h2 {
-    margin-bottom: 1rem;
     color: g.$black;
     font-size: 1.2rem;
     font-weight: 600;
   }
 
   p {
-    margin: 0 0 1.5rem;
+    margin: 0;
+    margin-top: 1rem;
     color: g.$clrg400;
     font-size: 0.9rem;
     line-height: 1.5;
@@ -458,27 +422,26 @@
 }
 
 // Tier別銘柄入力タイトル
-.stockInputTitle {
-  margin-bottom: 1rem;
+.stock-input--title {
   color: #2d3748;
   font-size: 1.5rem;
   font-weight: 600;
 }
 
 // FormationSelector コンポーネント
-.formationSelectorWrap {
+.formation-selector--wrap {
+  margin-top: 1rem;
   padding: 1rem 0;
 }
 
-.formationSelectorTitle {
-  margin-bottom: 0.5rem;
+.formation-selector--title {
   color: g.$black;
   font-size: 1.1rem;
   font-weight: 600;
   letter-spacing: -0.02em;
 }
 
-.formationSelectorDescription {
+.formation-selector--description {
   margin-top: 0.5rem;
   color: #6b7280;
   font-size: 14px;
@@ -486,7 +449,7 @@
 }
 
 // Radix UI Select のスタイリング
-.formationSelectTrigger {
+.formation-select--trigger {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -520,7 +483,7 @@
   }
 }
 
-.formationSelectIcon {
+.formation-select--icon {
   margin-left: 8px;
   transition: transform 0.2s ease;
   color: #6b7280;
@@ -531,7 +494,7 @@
   }
 }
 
-.formationSelectContent {
+.formation-select--content {
   z-index: 50;
   margin-top: 4px;
   overflow: hidden;
@@ -541,11 +504,11 @@
   box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
-.formationSelectViewport {
+.formation-select--viewport {
   padding: 4px;
 }
 
-.formationSelectItem {
+.formation-select--item {
   display: flex;
   position: relative;
   align-items: center;
@@ -570,7 +533,7 @@
   }
 }
 
-.formationSelectIndicator {
+.formation-select--indicator {
   position: absolute;
   left: 12px;
   color: #2563eb;
@@ -578,11 +541,11 @@
   font-weight: bold;
 }
 
-.formationSelectorButtonList {
+.formation-selector--button-list {
   margin-top: 1.5rem;
 }
 
-.formationSelectorButton {
+.formation-selector--button {
   display: block;
   width: 100%;
   margin: 8px 0;
@@ -615,28 +578,28 @@
 }
 
 // StockInput コンポーネント
-.stockInputSection {
-  margin-bottom: 1.5rem;
+.stock-input--section {
+  margin-top: 1.5rem;
 }
 
-.stockInputCard {
+.stock-input--card {
   @extend %card-base;
 }
 
-.tierSection {
-  margin-bottom: 1.5rem;
+.tier--section {
+  margin-top: 1.5rem;
   padding: 1.5rem;
   border: 1px solid #e2e8f0;
   border-radius: 8px;
   background: #f8fafc;
 }
 
-.tierHeader {
+.tier--header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  margin-bottom: 1rem;
+  margin-top: 1rem;
   padding-bottom: 0.75rem;
   border-bottom: 1px solid #e2e8f0;
 
@@ -650,13 +613,13 @@
   }
 }
 
-.tierDetails {
+.tier--details {
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
-.tierPercentage {
+.tier--percentage {
   padding: 4px 8px;
   border-radius: 6px;
   background: #e2e8f0;
@@ -665,7 +628,7 @@
   font-weight: 600;
 }
 
-.tierAmount {
+.tier--amount {
   padding: 4px 8px;
   border-radius: 6px;
   background: #bee3f8;
@@ -674,14 +637,14 @@
   font-weight: 600;
 }
 
-.stockTierInfo {
+.stock-tier--info {
   display: flex;
   flex-shrink: 0;
   align-items: center;
   gap: 0.5rem;
 }
 
-.balanceInfo {
+.balance--info {
   padding: 4px 8px;
   border-radius: 4px;
   background: rgba(59, 130, 246, 0.1);
@@ -691,7 +654,7 @@
 
 }
 
-.estimateInfo {
+.estimate--info {
   padding: 4px 8px;
   border-radius: 4px;
   background: rgba(16, 185, 129, 0.1);
@@ -701,14 +664,14 @@
 
 }
 
-.tierInputs {
+.tier--inputs {
   display: grid;
   grid-template-columns: 1fr;
   gap: 1rem;
   align-items: end;
 }
 
-.inputGroup {
+.input--group {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -720,7 +683,7 @@
   }
 }
 
-.tickerSelect {
+.ticker--select {
   width: 100%;
   padding: 8px 12px;
   border: 1px solid #d1d5db;
@@ -735,7 +698,7 @@
   }
 }
 
-.numberInput {
+.number--input {
   width: 100%;
   padding: 8px 12px;
   border: 1px solid #d1d5db;
@@ -749,13 +712,13 @@
   }
 }
 
-.goalDisplay {
+.goal--display {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 
-.goalValue {
+.goal--value {
   padding: 8px 12px;
   border-radius: 6px;
   background: #e2e8f0;
@@ -765,75 +728,73 @@
 }
 
 // BudgetManager コンポーネント
-.budgetManagerWrap {
+.budget-manager--wrap {
   width: 100%;
-  padding: 1rem 0;
+  margin-top: 2.5rem;
 }
 
-.budgetHeader {
-  margin-bottom: 2rem;
+.budget--header {
 }
 
 .title--large {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin-bottom: 0.5rem;
+  margin-top: 0.5rem;
   color: #2d3748;
   font-size: 1.5rem;
   font-weight: 600;
 }
 
-.titleIcon {
+.title--icon {
   color: #667eea;
 }
 
-.headerDescription {
+.header--description {
   margin-top: 0.5rem;
   color: #6b7280;
   font-size: 14px;
   line-height: 1.5;
 }
 
-.budgetManagerDescription {
+.budget-manager--description {
   margin-top: 0.5rem;
   color: #6b7280;
   font-size: 14px;
   line-height: 1.5;
 }
 
-.budgetForm {
-  padding: 2rem;
+.budget--form {
+  padding: 1rem var(--gutter-row);
   border: 1px solid #e2e8f0;
-  border-radius: 12px;
   background: #f8fafc;
 }
 
-.budgetInputGroup {
-  margin-bottom: 2rem;
+.budget-input--group {
+  margin-top: 2rem;
 }
 
-.budgetInputLabel {
+.budget-input--label {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin-bottom: 0.75rem;
+  margin-top: 0.75rem;
   color: #374151;
   font-size: 14px;
   font-weight: 600;
 }
 
-.labelIcon {
+.label--icon {
   color: #6b7280;
 }
 
-.budgetInputWrapper {
+.budget-input--wrapper {
   display: flex;
   position: relative;
   align-items: center;
 }
 
-.budgetInputPrefix {
+.budget-input--prefix {
   position: absolute;
   z-index: 1;
   left: 12px;
@@ -842,7 +803,7 @@
   pointer-events: none;
 }
 
-.budgetInput {
+.budget--input {
   width: 100%;
   padding: 12px 16px 12px 32px;
   transition: all 0.2s ease;
@@ -864,7 +825,7 @@
   }
 }
 
-.fundsInput {
+.funds--input {
   border-color: #10b981;
 
   &:focus {
@@ -873,7 +834,7 @@
   }
 }
 
-.startInput {
+.start--input {
   border-color: #3b82f6;
 
   &:focus {
@@ -882,7 +843,7 @@
   }
 }
 
-.profitInput {
+.profit--input {
   border-color: #f59e0b;
 
   &:focus {
@@ -891,14 +852,14 @@
   }
 }
 
-.budgetInputHelp {
+.budget-input--help {
   margin-top: 0.5rem;
   color: #6b7280;
   font-size: 12px;
   line-height: 1.4;
 }
 
-.budgetReturnSection {
+.budget-return--section {
   margin: 2rem 0;
   padding: 1.5rem;
   border: 1px solid #e2e8f0;
@@ -906,15 +867,15 @@
   background: white;
 }
 
-.budgetReturnTitle {
-  margin-bottom: 1rem;
+.budget-return--title {
+  margin-top: 1rem;
   color: #374151;
   font-size: 18px;
   font-weight: 600;
 }
 
-.budgetReturnValue {
-  margin-bottom: 0.5rem;
+.budget-return--value {
+  margin-top: 0.5rem;
   color: #059669;
   font-size: 24px;
   font-weight: 700;
@@ -924,29 +885,29 @@
   }
 }
 
-.budgetReturnFormula {
+.budget-return--formula {
   color: #6b7280;
   font-size: 14px;
 }
 
-.budgetSummarySection {
+.budget-summary--section {
   margin-top: 1.5rem;
 }
 
-.budgetSummaryTitle {
-  margin-bottom: 1rem;
+.budget-summary--title {
+  margin-top: 1rem;
   color: #374151;
   font-size: 18px;
   font-weight: 600;
 }
 
-.budgetSummaryGrid {
+.budget-summary--grid {
   display: grid;
   grid-template-columns: 1fr;
   gap: 0.8rem;
 }
 
-.budgetSummaryItem {
+.budget-summary--item {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -956,13 +917,13 @@
   background: white;
 }
 
-.budgetSummaryLabel {
+.budget-summary--label {
   color: #6b7280;
   font-size: 14px;
   font-weight: 500;
 }
 
-.budgetSummaryValue {
+.budget-summary--value {
   color: #111827;
   font-size: 16px;
   font-weight: 600;

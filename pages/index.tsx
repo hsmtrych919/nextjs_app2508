@@ -43,7 +43,7 @@ export default function SatelliteInvestmentApp() {
         </section>
 
         {/* 1. フォーメーション選択（FormationSelector） */}
-        <section className={`${styles.formationSection}`}>
+        <section className={`${styles['formation--section']}`}>
           <div className={`${gridStyles['row--container']} ${gutterStyles.container}`}>
             <div className={`${gridStyles['col--12']}`}>
               <FormationSelector />
@@ -60,16 +60,16 @@ export default function SatelliteInvestmentApp() {
         <BudgetManager />
 
         {/* 4. Formation Usage表示（シンプルテキスト） */}
-        <section className={`${styles.statsSection}`}>
+        <section className={`${styles['stats--section']}`}>
           <div className={`${gridStyles['row--container']} ${gutterStyles.container}`}>
             <div className={`${gridStyles['col--12']}`}>
-              <div className={styles.statsCard}>
+              <div className={styles['stats--card']}>
                 <h2>フォーメーション使用統計</h2>
-                <div className={styles.statsList}>
+                <div className={styles['stats--list']}>
                   {FORMATION_DEFINITIONS.map((formation) => {
                     const usage = formationUsage.find(u => u.formationId === formation.id);
                     return (
-                      <div key={formation.id} className={styles.statItem}>
+                      <div key={formation.id} className={styles['stat--item']}>
                         <span>{formation.name}</span>
                         <span>{usage?.usagePercentage || 0}%</span>
                         <span>使用回数: {usage?.usageCount || 0}</span>

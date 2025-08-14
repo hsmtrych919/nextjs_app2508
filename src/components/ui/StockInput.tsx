@@ -71,11 +71,11 @@ export default function StockInput() {
   ];
 
   return (
-    <section className={`${styles.stockInputSection}`}>
+    <section className={`${styles['stock-input--section']}`}>
       <div className={`${gridStyles['row--container']} ${gutterStyles.container}`}>
         <div className={`${gridStyles['col--12']}`}>
-          <div className={styles.stockInputCard}>
-            <h2 className={styles.stockInputTitle}>Tier別銘柄入力</h2>
+          <div className={styles['stock-input--card']}>
+            <h2 className={styles['stock-input--title']}>Tier別銘柄入力</h2>
 
             {selectedFormation.percentages.map((percentage, index) => {
               const tierNumber = index + 1;
@@ -84,23 +84,23 @@ export default function StockInput() {
               const goalShares = calculateGoalShares(targetAmount, parseFloat(tierInput.entryPrice) || 0);
 
               return (
-                <div key={tierNumber} className={styles.tierSection}>
-                  <div className={styles.tierHeader}>
+                <div key={tierNumber} className={styles['tier--section']}>
+                  <div className={styles['tier--header']}>
                     <h3>Tier {tierNumber}</h3>
-                    <div className={styles.tierDetails}>
-                      <span className={styles.tierPercentage}>{percentage}%</span>
-                      <span className={styles.tierAmount}>${targetAmount.toLocaleString()}</span>
+                    <div className={styles['tier--details']}>
+                      <span className={styles['tier--percentage']}>{percentage}%</span>
+                      <span className={styles['tier--amount']}>${targetAmount.toLocaleString()}</span>
                     </div>
                   </div>
 
-                  <div className={styles.tierInputs}>
+                  <div className={styles['tier--inputs']}>
                     {/* ティッカー選択 */}
-                    <div className={styles.inputGroup}>
+                    <div className={styles['input--group']}>
                       <label>Ticker</label>
                       <select
                         value={tierInput.ticker}
                         onChange={(e) => updateTierInput(index, 'ticker', e.target.value)}
-                        className={styles.tickerSelect}
+                        className={styles['ticker--select']}
                       >
                         <option value="">銘柄を選択</option>
                         {satelliteTickers.map(ticker => (
@@ -110,7 +110,7 @@ export default function StockInput() {
                     </div>
 
                     {/* Entry価格入力 */}
-                    <div className={styles.inputGroup}>
+                    <div className={styles['input--group']}>
                       <label>Entry</label>
                       <input
                         type="number"
@@ -119,12 +119,12 @@ export default function StockInput() {
                         placeholder="0.00"
                         step="0.01"
                         min="0"
-                        className={styles.numberInput}
+                        className={styles['number--input']}
                       />
                     </div>
 
                     {/* Hold株数入力 */}
-                    <div className={styles.inputGroup}>
+                    <div className={styles['input--group']}>
                       <label>Hold</label>
                       <input
                         type="number"
@@ -132,14 +132,14 @@ export default function StockInput() {
                         onChange={(e) => updateTierInput(index, 'holdShares', e.target.value)}
                         placeholder="0"
                         min="0"
-                        className={styles.numberInput}
+                        className={styles['number--input']}
                       />
                     </div>
 
                     {/* Goal株数表示 */}
-                    <div className={styles.goalDisplay}>
+                    <div className={styles['goal--display']}>
                       <label>Hold/Goal</label>
-                      <span className={styles.goalValue}>
+                      <span className={styles['goal--value']}>
                         {tierInput.holdShares || 0}/{goalShares}
                       </span>
                     </div>
