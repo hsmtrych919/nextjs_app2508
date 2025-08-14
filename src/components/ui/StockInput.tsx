@@ -206,12 +206,29 @@ export default function StockInput() {
                         />
                       </div>
 
-                      {/* Hold/Goal表示 */}
+                      {/* Hold/Goal表示（視覚的改善版） */}
                       <div className={styles['goal--display']}>
                         <label>Hold/Goal</label>
-                        <span className={styles['goal--value']}>
-                          {tierInput.holdShares || 0}/{goalShares}
-                        </span>
+                        <div className={styles['goal--container']}>
+                          <span className={styles['goal--value']}>
+                            {tierInput.holdShares || 0}/{goalShares}
+                          </span>
+                          {/* 進捗率表示 */}
+                          <div className={styles['progress--info']}>
+                            <span className={styles['progress--percentage']}>
+                              {goalShares > 0 ? Math.round(((parseFloat(tierInput.holdShares) || 0) / goalShares) * 100) : 0}%
+                            </span>
+                          </div>
+                          {/* プログレスバー */}
+                          <div className={styles['progress--bar']}>
+                            <div
+                              className={styles['progress--fill']}
+                              style={{
+                                width: `${goalShares > 0 ? Math.min(((parseFloat(tierInput.holdShares) || 0) / goalShares) * 100, 100) : 0}%`
+                              }}
+                            />
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
