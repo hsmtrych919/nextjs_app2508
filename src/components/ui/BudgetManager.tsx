@@ -127,18 +127,18 @@ export default function BudgetManager() {
 
         {/* 利回り表示 - 常時表示 */}
         <div className={styles['budget-return--section']}>
-          <div className={styles.budgetReturnCard}>
-            <div className={styles.budgetReturnHeader}>
+          <div className={styles['budget-return--card']}>
+            <div className={styles['budget-return--header']}>
               <h3 className={styles['budget-return--title']}>現在の利回り</h3>
             </div>
             <div className={`${styles['budget-return--value']} ${returnPercentage < 0 ? styles.negative : ''}`}>
               {returnPercentage >= 0 ? '+' : ''}{returnPercentage.toFixed(2)}%
             </div>
-            <div className={styles.budgetReturnCalc}>
-              <p className={styles.calcFormula}>
+            <div className={styles['budget-return--calc']}>
+              <p className={styles['calc--formula']}>
                 計算式: ({profit.toLocaleString()} ÷ {start.toLocaleString()}) × 100
               </p>
-              <p className={styles.calcNote}>
+              <p className={styles['calc--note']}>
                 ※ 利回り = (現在利益 ÷ 開始元本) × 100
               </p>
             </div>

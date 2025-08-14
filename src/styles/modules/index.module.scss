@@ -292,19 +292,19 @@
 }
 
 // エラー・ローディングセクション
-.errorSection,
-.loadingSection {
+.error--section,
+.loading--section {
   margin-top: 1rem;
 }
 
-.errorCard,
-.loadingCard {
+.error--card,
+.loading--card {
   @include card.card-base;
   margin-top: 1rem;
   text-align: center;
 }
 
-.errorCard {
+.error--card {
   border-left: 4px solid #e74c3c;
   background: #fee;
 
@@ -315,7 +315,7 @@
   }
 }
 
-.loadingCard {
+.loading--card {
   border-left: 4px solid #3498db;
   background: #f0f8ff;
 
@@ -365,7 +365,7 @@
 }
 
 // スピナーアニメーション
-.spinner {
+.spinner--animation {
   position: relative;
   width: 32px;
   height: 32px;

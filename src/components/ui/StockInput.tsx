@@ -106,7 +106,7 @@ export default function StockInput() {
           <div className={`${gridStyles['col--12']}`}>
             <div className={styles['stock-input--card']}>
               <h2 className={styles['stock-input--title']}>Tier別銘柄入力</h2>
-              <p className={styles['formation-message']}>
+              <p className={styles['formation--message']}>
                 {selectedFormation.name}が選択されています。Tier別の銘柄入力は不要です。
               </p>
             </div>
