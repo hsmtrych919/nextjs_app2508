@@ -89,6 +89,24 @@ export default function StockInput() {
     );
   }
 
+  // フルポジ/ノーポジの場合は入力エリア非表示
+  if (selectedFormation.id === 'formation_full_position' || selectedFormation.id === 'formation_no_position') {
+    return (
+      <section className={`${styles['stock-input--section']}`}>
+        <div className={`${gridStyles['row--container']} ${gutterStyles.container}`}>
+          <div className={`${gridStyles['col--12']}`}>
+            <div className={styles['stock-input--card']}>
+              <h2 className={styles['stock-input--title']}>Tier別銘柄入力</h2>
+              <p className={styles['formation-message']}>
+                {selectedFormation.name}が選択されています。Tier別の銘柄入力は不要です。
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className={`${styles['stock-input--section']}`}>
       <div className={`${gridStyles['row--container']} ${gutterStyles.container}`}>

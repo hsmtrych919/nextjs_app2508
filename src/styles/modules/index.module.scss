@@ -1,6 +1,7 @@
 @charset "utf-8";
 @use "sass:color";
 @use "../global/global" as g;
+@use "../global/mixins/card" as card;
 
 // サテライト投資アプリ モバイル専用スタイル
 
@@ -110,34 +111,6 @@
   }
 }
 
-// カード共通スタイル
-%card-base {
-  position: relative;
-  padding: 1.5rem var(--gutter-row);
-  transition: all 0.2s ease;
-  border: 1px solid rgba(255, 255, 255, 0.8);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  box-shadow:
-    0 4px 16px rgba(0, 0, 0, 0.08),
-    0 1px 4px rgba(0, 0, 0, 0.04);
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow:
-      0 8px 32px rgba(0, 0, 0, 0.12),
-      0 2px 8px rgba(0, 0, 0, 0.08);
-  }
-
-  h2 {
-    color: g.$black;
-    font-size: 1.1rem;
-    font-weight: 600;
-    letter-spacing: -0.02em;
-  }
-}
-
 // 予算管理セクション
 .budget-manager--section {
   margin-top: 1rem;
@@ -148,7 +121,7 @@
 }
 
 .budget--card {
-  @extend %card-base;
+  @include card.card-base;
   margin-top: 1rem;
 }
 
@@ -193,7 +166,7 @@
 }
 
 .formation--card {
-  @extend %card-base;
+  @include card.card-base;
   margin-top: 1rem;
 }
 
@@ -282,7 +255,7 @@
 }
 
 .stats--card {
-  @extend %card-base;
+  @include card.card-base;
 }
 
 .stats--list {
@@ -326,7 +299,7 @@
 
 .errorCard,
 .loadingCard {
-  @extend %card-base;
+  @include card.card-base;
   margin-top: 1rem;
   text-align: center;
 }
@@ -569,6 +542,8 @@
     }
   }
 }
+
+
 
 /* ====================================
  * FormationUsage Component Styles

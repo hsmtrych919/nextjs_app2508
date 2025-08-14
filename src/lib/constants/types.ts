@@ -86,7 +86,7 @@ export const FORMATION_DEFINITIONS: FormationType[] = [
   },
   {
     id: 'formation_4_40_30_20_10',
-    name: '4銘柄 40-30-20-10%型', 
+    name: '4銘柄 40-30-20-10%型',
     tiers: 4,
     percentages: [40, 30, 20, 10]
   },
@@ -95,6 +95,18 @@ export const FORMATION_DEFINITIONS: FormationType[] = [
     name: '5銘柄 30-25-20-15-10%型',
     tiers: 5,
     percentages: [30, 25, 20, 15, 10]
+  },
+  {
+    id: 'formation_full_position',
+    name: 'フルポジ',
+    tiers: 0,
+    percentages: []
+  },
+  {
+    id: 'formation_no_position',
+    name: 'ノーポジ',
+    tiers: 0,
+    percentages: []
   }
 ];
 
