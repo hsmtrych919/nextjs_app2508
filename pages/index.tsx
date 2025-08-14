@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import Layout from '@/components/layout/layout';
 import BudgetManager from '@/components/ui/BudgetManager';
 import FormationSelector from '@/components/ui/FormationSelector';
@@ -17,26 +17,16 @@ export default function SatelliteInvestmentApp() {
     selectedFormation,
     tiers,
     budget,
-    formationUsage,
-    isLoading,
-    error,
-    updateBudget
+    formationUsage
   } = useAppStore();
 
   // 初期データ読み込み（バックグラウンド処理）
   const loadDataFromAPI = useLoadDataFromAPI();
 
-  // ローカル状態
-  const [isInitialized, setIsInitialized] = useState(false);
-
   // 初期データ読み込み（バックグラウンド処理）
   useEffect(() => {
-    if (!isInitialized) {
-      loadDataFromAPI().finally(() => {
-        setIsInitialized(true);
-      });
-    }
-  }, [loadDataFromAPI, isInitialized]);
+    loadDataFromAPI();
+  }, [loadDataFromAPI]);
 
   return (
     <Layout>
@@ -106,48 +96,7 @@ export default function SatelliteInvestmentApp() {
           </div>
         </section>
 
-        {/* エラー表示 */}
-        {error && (
-          <section className={`${styles.errorSection}`}>
-            <div className={`${gridStyles['row--container']} ${gutterStyles.container}`}>
-              <div className={`${gridStyles['col--12']}`}>
-                <div className={styles.errorCard}>
-                  <p>{error}</p>
-                </div>
-              </div>
-            </div>
-          </section>
-        )}
 
-        {/* ローディング表示 */}
-        {isLoading && (
-          <section className={`${styles.loadingSection}`}>
-            <div className={`${gridStyles['row--container']} ${gutterStyles.container}`}>
-              <div className={`${gridStyles['col--12']}`}>
-                <div className={styles.loadingCard}>
-                  <p>
-                    {!isInitialized ? 'アプリを初期化中...' : 'データを処理中...'}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* 初期化中のオーバーレイ */}
-        {!isInitialized && (
-          <section className={`${styles.initializingSection}`}>
-            <div className={`${gridStyles['row--container']} ${gutterStyles.container}`}>
-              <div className={`${gridStyles['col--12']}`}>
-                <div className={styles.initializingCard}>
-                  <h2>データ読み込み中</h2>
-                  <p>サーバーからデータを取得しています...</p>
-                  {isLoading && <div className={styles.spinner}></div>}
-                </div>
-              </div>
-            </div>
-          </section>
-        )}
 
       </main>
     </Layout>
