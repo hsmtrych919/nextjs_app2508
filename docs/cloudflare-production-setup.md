@@ -1,7 +1,17 @@
 # Cloudflare 本番環境セットアップガイド
-## Agent 2 - Phase 3項目2: 本番環境準備
 
-生成日: 2025-08-11
+### セキュリティ設定
+
+#### 本番環境で必要な最低限の設定
+- `DEBUG_MODE=false` - デバッグ情報の無効化
+- `LOG_LEVEL=warn` - 本番用ログレベル
+- `ENVIRONMENT=production` - 環境識別
+
+#### 機密情報の管理
+- データベースURLやAPIキーはSecretsとして設定
+- 環境変数は公開情報のみ
+- ローカル開発時は`.env.local`（gitignore対象）
+
 
 ### 1. Cloudflare D1本番設定
 

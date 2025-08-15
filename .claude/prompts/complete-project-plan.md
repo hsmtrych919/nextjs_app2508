@@ -1,12 +1,23 @@
 ````markdown
 # サテライト投資管理アプリ 完全完成計画書
 
+## 📁 重要ファイル参照
+
+### 開発ガイドライン
+- **`docs/ai-conduct-oath.md` - 開発時絶対遵守ルール**
+- **`docs/ai-critical-rules.md` - 開発時絶対遵守ルール**
+- `docs/scss-styling-guide.md` - スタイリング指針
+- `docs/file-naming-standards-scss.md` - scss命名規則
+- `docs/file-naming-standards-ts.md` - TypeScript命名規則
+- `docs/jsdoc-component-guide.md` - コンポーネント文書化
+
+
 ## 📋 プロジェクト概要
 
 ### 🎯 プロジェクト目標
 6000ドルのサテライト投資資金を効率的に管理するためのWebアプリケーション。フォーメーション戦略に基づく資金配分と銘柄管理を行う完全機能型システムの構築。
 
-### 📊 現状分析（2024年12月時点）
+### 📊 現状分析
 
 #### ✅ 完成済み項目
 - **技術基盤**: Next.js 13.5 + TypeScript + Cloudflare Pages/D1
@@ -186,6 +197,9 @@ Tier X (xx% - $x,xxx)
 - Pages本番デプロイ設定
 - 環境変数設定
 - Cron Triggers設定
+- 全機能動作確認
+- データベース接続確認
+- Cron動作確認
 
 #### 5.2 最終品質確認
 **確認項目**:
@@ -194,25 +208,7 @@ Tier X (xx% - $x,xxx)
 - パフォーマンステスト
 - セキュリティ確認
 
-## 📅 実装スケジュール
 
-### 即座実行（緊急対応）
-- **Day 1**: Phase 1完了（UI基盤修正）
-  - 8:00-12:00: 画面構成修正
-  - 13:00-17:00: FormationSelector実装
-  - 18:00-20:00: BudgetManager機能拡張
-
-### 中期実装
-- **Day 2-4**: Phase 2完了（メイン機能実装）
-  - StockInput完全実装
-  - 動的Tier生成
-  - 計算エンジン実装
-
-### 最終仕上げ
-- **Day 5-7**: Phase 3-5完了
-  - データフロー最適化
-  - UI/UX品質向上
-  - 本番環境準備
 
 ## ✅ 成功基準
 
@@ -295,17 +291,7 @@ Tier X (xx% - $x,xxx)
 - 責任逃れのための技術的言い訳
 - docs/ガイドライン違反
 
-## 📁 重要ファイル参照
 
-### 設計ドキュメント
-- `/Users/hsmtrychmba/Desktop/00_document.md` - 原本仕様書
-- `.claude/prompts/ui-analysis-and-fix-plan.md` - 問題分析＆修正計画
-- `docs/development-critical-rules.md` - 開発時絶対遵守ルール
-
-### 開発ガイドライン
-- `docs/scss-styling-guide.md` - スタイリング指針
-- `docs/file-naming-standards-ts.md` - TypeScript命名規則
-- `docs/jsdoc-component-guide.md` - コンポーネント文書化
 
 ### 技術設定
 - `playwright.config.js` - iPhone 12 Pro (390x844) 設定

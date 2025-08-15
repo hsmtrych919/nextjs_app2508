@@ -6,9 +6,6 @@ name = "satellite-investment-app"
 compatibility_date = "2025-08-10"
 compatibility_flags = ["nodejs_compat"]
 
-# アカウント設定（環境変数で管理）
-# account_id = { var = "CLOUDFLARE_ACCOUNT_ID" }
-
 # Pages Functions設定
 pages_build_output_dir = "_dist"
 
@@ -23,15 +20,19 @@ preview_database_id = "31102c68-1cd7-4696-862f-2a115724f331"  # ローカル開�
 [[env.production.d1_databases]]
 binding = "DB"
 database_name = "satellite-investment-db-prod"
-database_id = { var = "PROD_DATABASE_ID" }  # 本番用環境変数参照
-
-# Cron Triggers設定
-[[triggers.crons]]
-cron = "0 5 * * *"  # 毎日AM5:00（UTC）
-timezone = "Asia/Tokyo"  # 日本時間
+database_id = "a30360f1-cac4-4f36-b3e6-6b3fb52ff1ee"
 
 # 環境変数設定
 [vars]
+API_VERSION = "1.0.0"
+APP_NAME = "Satellite Investment Manager"
+TYPE_SYSTEM_VERSION = "1.3.0"
+
+# プレビュー環境変数
+[env.preview.vars]
+ENVIRONMENT = "preview"
+DEBUG_MODE = "true"
+LOG_LEVEL = "info"
 API_VERSION = "1.0.0"
 APP_NAME = "Satellite Investment Manager"
 TYPE_SYSTEM_VERSION = "1.3.0"
@@ -41,18 +42,9 @@ TYPE_SYSTEM_VERSION = "1.3.0"
 ENVIRONMENT = "production"
 DEBUG_MODE = "false"
 LOG_LEVEL = "warn"
-
-# プレビュー環境変数
-[env.preview.vars]
-ENVIRONMENT = "preview"
-DEBUG_MODE = "true"
-LOG_LEVEL = "info"
-
-# 開発環境変数（ローカル）
-[env.development.vars]
-ENVIRONMENT = "development"
-DEBUG_MODE = "true"
-LOG_LEVEL = "debug"
+API_VERSION = "1.0.0"
+APP_NAME = "Satellite Investment Manager"
+TYPE_SYSTEM_VERSION = "1.3.0"
 
 # ビルド設定（ローカル開発時は手動でnpm run buildを実行）
 # [build]
