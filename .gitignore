@@ -1,11 +1,11 @@
 node_modules/
-.claude/tmp/
 package-lock.json
 tsconfig.tsbuildinfo
 _dist/
 _dist
 .next/
 .serena/*
+.serena/
 !.serena/project.yml
 draft.jsx
 .env
@@ -15,3 +15,6 @@ draft.jsx
 .wrangler/
 playwright-report/
 test-results/
+.claude
+.claude/*
+.claude/tmp/
