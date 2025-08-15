@@ -1,6 +1,5 @@
 # Cloudflare Workers/Pages設定ファイル
 # サテライト投資管理アプリ用
-# Agent 2 - Phase 1-4: 完全なWorkers設定
 
 name = "satellite-investment-app"
 compatibility_date = "2025-08-10"
