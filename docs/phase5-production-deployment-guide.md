@@ -214,9 +214,9 @@ wrangler pages deployment list --project-name=satellite-investment-app
 
 ### 6.1 最新コードデプロイ
 ```bash
-# 最新ビルド・デプロイ
+# 最新ビルド・デプロイ（本番環境）
 npm run build
-wrangler pages deploy _dist --project-name=satellite-investment-app --env=production
+wrangler pages deploy _dist --project-name=satellite-investment-app --branch=main
 ```
 
 ### 6.2 本番環境動作確認
