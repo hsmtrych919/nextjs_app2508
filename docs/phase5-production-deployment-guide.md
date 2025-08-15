@@ -108,11 +108,30 @@ formation_history
 ```bash
 # Pagesプロジェクト作成・初回デプロイ
 npm run build
-wrangler pages deploy _dist --project-name=satellite-investment-app
+wrangler pages deploy _dist --project-name=satellite-investment-app --branch=main
 ```
 
+--branch=mainはCloudflare Pages側の環境設定の名前で、あなたのGitリポジトリのmainブランチとは関係ありません。
+
+**Cloudflare側では「main環境」（通常はProduction）として扱われる**
+wrangler pages deploy _dist --project-name=satellite-investment-app --branch=main
+
+**Cloudflare側では「dev環境」（Preview）として扱われる**
+wrangler pages deploy _dist --project-name=satellite-investment-app --branch=dev
+
+
+--branch=mainでコマンド実行しているのに、プロジェクト作成画面で「production branch name」にdevAgent1と表示されて変更できない、ということですね。
+これはwranglerのバグ的な動作です。
+解決方法
+そのままdevAgent1でEnterを押してください。
+理由：
+--branch=mainを指定したのに、なぜかdevAgent1がdefaultになっている
+でも作成後は普通に--branch=mainでProduction環境にデプロイできます
+この初期設定は後から変更可能
+
+
 **手順:**
-1. プロジェクト名: `satellite-investment-app`
+1. コマンド実行、対象のブランチ聞かれる（変更不可、確認するだけ）
 2. 初回デプロイが実行されます
 3. 完了後にURL（例: `https://xxxxxxxx.satellite-investment-app.pages.dev`）が表示
 
@@ -137,50 +156,57 @@ URL: https://xxxxxxxx.satellite-investment-app.pages.dev
 2. **Settings** → **Environment variables** → **Production** タブ
 
 ### 4.2 環境変数設定（Production）
-以下を追加:
+**Settings** → **Environment variables** → **Production** タブで以下を追加:
+
+**⚠️ 重要：すべて「Text」タイプで設定してください**
+
 ```
-ENVIRONMENT = production
-DEBUG_MODE = false
-LOG_LEVEL = warn
-API_VERSION = 1.0.0
-APP_NAME = Satellite Investment Manager
-TYPE_SYSTEM_VERSION = 1.3.0
-```
-
-### 4.3 Secrets設定（機密情報）
-**Settings** → **Secrets and Variables** → **Production**で以下を設定:
-
-```bash
-# まずDatabase UUIDを確認
-wrangler d1 list
-
-# 表示された satellite-investment-db-prod のUUIDを
-# Cloudflare DashboardのSecretsに設定:
-# Variable name: PROD_DATABASE_ID
-# Value: [上記コマンドで確認したUUID]
+名前: ENVIRONMENT        値: production      タイプ: Text
+名前: DEBUG_MODE        値: false           タイプ: Text
+名前: LOG_LEVEL         値: warn            タイプ: Text
+名前: API_VERSION       値: 1.0.0           タイプ: Text
+名前: APP_NAME          値: Satellite Investment Manager  タイプ: Text
+名前: TYPE_SYSTEM_VERSION  値: 1.3.0        タイプ: Text
 ```
 
-### 4.4 Functions binding設定
-**Settings** → **Functions** → **D1 database bindings**:
+### 4.3 D1 Database Binding設定
+**Settings** → **Functions** → **D1 database bindings**で以下を設定:
+
 ```
 Variable name: DB
 D1 database: satellite-investment-db-prod
 ```
 
+**手順:**
+1. Cloudflare Dashboard → Settings → Functions
+2. 「D1 database bindings」セクション
+3. 「Add binding」をクリック
+4. Variable name: `DB`
+5. D1 database: `satellite-investment-db-prod` を選択
+6. 「Save」をクリック
+
+**✅ これで完了：Database IDはwrangler.tomlで既に設定済み**
+
 ---
 
-## 🎯 Step 5: Cron Triggers設定【5分】
+## 🎯 Step 5: プロジェクト状態確認【5分】
 
-### 5.1 Cron設定確認
+### 5.1 Pagesプロジェクト確認
 ```bash
-# Cron設定状況確認
-wrangler pages list
+# Pagesプロジェクト一覧確認
+wrangler pages project list
 ```
 
-### 5.2 必要に応じてCron手動設定
-Cloudflare Dashboardで確認:
-- **Workers & Pages** → **satellite-investment-app** → **Scheduled Events**
-- 設定: `0 5 * * *` (毎日午前5時JST)
+### 5.2 デプロイメント状況確認
+```bash
+# デプロイメント履歴確認
+wrangler pages deployment list --project-name=satellite-investment-app
+```
+
+**⚠️ 注意: Cloudflare PagesにはCron機能がありません**
+- Cron Triggers (Scheduled Events) はCloudflare Workersの機能です
+- このアプリはPagesプロジェクトのためCron設定は不要です
+- 必要に応じて将来的にWorkers統合も可能です
 
 ---
 
@@ -188,9 +214,9 @@ Cloudflare Dashboardで確認:
 
 ### 6.1 最新コードデプロイ
 ```bash
-# 最新ビルド・デプロイ
+# 最新ビルド・デプロイ（本番環境）
 npm run build
-wrangler pages deploy _dist --project-name=satellite-investment-app --env=production
+wrangler pages deploy _dist --project-name=satellite-investment-app --branch=main
 ```
 
 ### 6.2 本番環境動作確認
@@ -254,7 +280,7 @@ database_id = ""  # 空文字にしてセキュア化
 - [ ] Cloudflare Pages プロジェクト作成・初回デプロイ完了
 - [ ] 本番環境変数・Secrets設定完了
 - [ ] D1 binding設定完了
-- [ ] Cron Triggers設定確認
+- [ ] プロジェクト状態確認完了
 - [ ] 本番デプロイ・全機能動作確認完了
 - [ ] wrangler.toml セキュア化完了
 
@@ -290,8 +316,8 @@ wrangler pages deploy _dist --project-name=satellite-investment-app --compatibil
 ```
 
 #### 問題4: データが保存されない
-- Secrets設定確認: `PROD_DATABASE_ID`
-- D1 binding確認
+- D1 binding確認: Variable name `DB` が設定されているか
+- wrangler.tomlの本番Database ID確認
 - ブラウザ開発者ツールでAPI エラー確認
 
 ---
