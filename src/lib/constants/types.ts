@@ -76,22 +76,22 @@ export type LoadDataResponseType = {
   formationUsage: FormationUsageType[];
 };
 
-// フォーメーション定義の定数（Agent2 API形式と統合）
+// フォーメーション定義の定数（正しい値）
 export const FORMATION_DEFINITIONS: FormationType[] = [
   {
-    id: 'formation_3_50_30_20',
+    id: 'formation-3-50-30-20',
     name: '3銘柄 50-30-20%型',
     tiers: 3,
     percentages: [50, 30, 20]
   },
   {
-    id: 'formation_4_40_30_20_10',
-    name: '4銘柄 40-30-20-10%型',
+    id: 'formation-4-35-30-20-15',
+    name: '4銘柄 35-30-20-15%型',
     tiers: 4,
-    percentages: [40, 30, 20, 10]
+    percentages: [35, 30, 20, 15]
   },
   {
-    id: 'formation_5_30_25_20_15_10',
+    id: 'formation-5-30-25-20-15-10',
     name: '5銘柄 30-25-20-15-10%型',
     tiers: 5,
     percentages: [30, 25, 20, 15, 10]

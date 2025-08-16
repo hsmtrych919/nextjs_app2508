@@ -9,7 +9,7 @@ import {
   useBudget,
   useFormationUsage
 } from '@/lib/utils/appStore';
-import { FORMATION_DEFINITIONS } from '@/lib/constants/formations';
+import { FORMATION_DEFINITIONS } from '@/lib/constants/types';
 import styles from '@/styles/modules/index.module.scss';
 import gridStyles from '@/styles/modules/grid.module.scss';
 import gutterStyles from '@/styles/modules/gutter.module.scss';

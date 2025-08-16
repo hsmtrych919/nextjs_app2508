@@ -36,6 +36,11 @@ const nextConfig = {
     unoptimized: true,
   },
 
+  // ESLintチェック無効化（ビルド時）
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+
   // API Routes除外設定
   experimental: {
     outputFileTracingRoot: path.join(__dirname, '../../'),

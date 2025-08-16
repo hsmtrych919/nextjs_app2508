@@ -1,7 +1,7 @@
 import React from 'react';
 import * as Select from '@radix-ui/react-select';
 import { ChevronDown } from 'lucide-react';
-import { FORMATION_DEFINITIONS } from '@/lib/constants/formations';
+import { FORMATION_DEFINITIONS } from '@/lib/constants/types';
 import {
   useSelectedFormation,
   useSelectFormation

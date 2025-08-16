@@ -2,7 +2,8 @@
 // Agent 2 Phase 2-1: Cloudflare Functions 専用実装
 
 import { createDatabaseService, handleDatabaseError, DatabaseError } from '../../src/lib/utils/database';
-import { FORMATIONS, API_ERROR_CODES, TICKER_SYMBOLS } from '../../src/lib/utils/types';
+import { FORMATION_DEFINITIONS } from '../../src/lib/constants/types';
+import { API_ERROR_CODES, TICKER_SYMBOLS } from '../../src/lib/utils/types';
 
 // Cloudflare Functions での GET リクエスト
 export async function onRequestGet(context) {
@@ -32,7 +33,13 @@ export async function onRequestGet(context) {
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString()
         },
-        formations: FORMATIONS,
+        formations: FORMATION_DEFINITIONS.map(f => ({
+          id: f.id,
+          name: f.name,
+          tiers: f.tiers,
+          targetPercentages: f.percentages,
+          description: f.name
+        })),
         usageStats: data.usageStats || []
       }
     };
@@ -100,7 +107,13 @@ export async function onRequestPost(context) {
         budget: data.budget,
         holdings: data.holdings || [],
         settings: data.settings,
-        formations: FORMATIONS,
+        formations: FORMATION_DEFINITIONS.map(f => ({
+          id: f.id,
+          name: f.name,
+          tiers: f.tiers,
+          targetPercentages: f.percentages,
+          description: f.name
+        })),
         usageStats: data.usageStats || []
       }
     };
