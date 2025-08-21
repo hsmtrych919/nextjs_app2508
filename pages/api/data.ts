@@ -2,10 +2,11 @@
 // Agent 2 Phase 2-1: データCRUD API実装完成版
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createDatabaseService, handleDatabaseError, DatabaseError } from '../../src/lib/utils/database';
-import { FORMATIONS, API_ERROR_CODES, TICKER_SYMBOLS } from '../../src/lib/utils/types';
-import type { 
-  ApiDataRequest, 
-  ApiDataResponse, 
+import { FORMATION_DEFINITIONS } from '../../src/lib/constants/types';
+import { API_ERROR_CODES, TICKER_SYMBOLS } from '../../src/lib/utils/types';
+import type {
+  ApiDataRequest,
+  ApiDataResponse,
   CloudflareEnv,
   HoldingType,
   BudgetType,
@@ -36,8 +37,8 @@ function getCloudflareEnv(): CloudflareEnv | null {
 // リクエストバリデーション関数
 function validateApiDataRequest(data: unknown): { valid: boolean; error?: string; errorCode?: ApiErrorCode } {
   if (!data || typeof data !== 'object') {
-    return { 
-      valid: false, 
+    return {
+      valid: false,
       error: 'リクエストボディは有効なJSONオブジェクトである必要があります',
       errorCode: API_ERROR_CODES.VALIDATION_ERROR
     };
@@ -49,22 +50,22 @@ function validateApiDataRequest(data: unknown): { valid: boolean; error?: string
   if (request.budget) {
     const { funds, start, profit } = request.budget;
     if (funds !== undefined && (typeof funds !== 'number' || funds < 0)) {
-      return { 
-        valid: false, 
+      return {
+        valid: false,
         error: '予算の資金は0以上の数値である必要があります',
         errorCode: API_ERROR_CODES.VALIDATION_ERROR
       };
     }
     if (start !== undefined && (typeof start !== 'number' || start < 0)) {
-      return { 
-        valid: false, 
+      return {
+        valid: false,
         error: '予算の開始金額は0以上の数値である必要があります',
         errorCode: API_ERROR_CODES.VALIDATION_ERROR
       };
     }
     if (profit !== undefined && typeof profit !== 'number') {
-      return { 
-        valid: false, 
+      return {
+        valid: false,
         error: '予算の利益は数値である必要があります',
         errorCode: API_ERROR_CODES.VALIDATION_ERROR
       };
@@ -76,48 +77,48 @@ function validateApiDataRequest(data: unknown): { valid: boolean; error?: string
     for (let index = 0; index < request.holdings.length; index++) {
       const holding = request.holdings[index];
       if (!holding.id || !holding.ticker || typeof holding.tier !== 'number') {
-        return { 
-          valid: false, 
+        return {
+          valid: false,
           error: `保有銘柄[${index}]: ID、ティッカーシンボル、階層が必要です`,
           errorCode: API_ERROR_CODES.VALIDATION_ERROR
         };
       }
-      
+
       if (!TICKER_SYMBOLS.includes(holding.ticker as TickerSymbol)) {
-        return { 
-          valid: false, 
+        return {
+          valid: false,
           error: `保有銘柄[${index}]: 無効なティッカーシンボル: ${holding.ticker}`,
           errorCode: API_ERROR_CODES.VALIDATION_ERROR
         };
       }
 
       if (holding.tier < 1 || holding.tier > 5) {
-        return { 
-          valid: false, 
+        return {
+          valid: false,
           error: `保有銘柄[${index}]: 階層は1から5の間である必要があります`,
           errorCode: API_ERROR_CODES.VALIDATION_ERROR
         };
       }
 
       if (typeof holding.entryPrice !== 'number' || holding.entryPrice <= 0) {
-        return { 
-          valid: false, 
+        return {
+          valid: false,
           error: `保有銘柄[${index}]: 取得価格は正の数値である必要があります`,
           errorCode: API_ERROR_CODES.VALIDATION_ERROR
         };
       }
 
       if (typeof holding.holdShares !== 'number' || holding.holdShares < 0) {
-        return { 
-          valid: false, 
+        return {
+          valid: false,
           error: `保有銘柄[${index}]: 保有株数は0以上の数値である必要があります`,
           errorCode: API_ERROR_CODES.VALIDATION_ERROR
         };
       }
 
       if (typeof holding.goalShares !== 'number' || holding.goalShares <= 0) {
-        return { 
-          valid: false, 
+        return {
+          valid: false,
           error: `保有銘柄[${index}]: 目標株数は正の数値である必要があります`,
           errorCode: API_ERROR_CODES.VALIDATION_ERROR
         };
@@ -127,10 +128,10 @@ function validateApiDataRequest(data: unknown): { valid: boolean; error?: string
 
   // フォーメーションIDバリデーション
   if (request.formationId) {
-    const validFormations = FORMATIONS.map(f => f.id);
+    const validFormations = FORMATION_DEFINITIONS.map(f => f.id);
     if (!validFormations.includes(request.formationId)) {
-      return { 
-        valid: false, 
+      return {
+        valid: false,
         error: `無効なフォーメーションID: ${request.formationId}`,
         errorCode: API_ERROR_CODES.INVALID_FORMATION
       };
@@ -145,26 +146,26 @@ class MockDatabaseService {
   private getCachedData<T>(key: string, producer: () => T, ttlMs: number = 30000): T {
     const cached = developmentStorage._cache.get(key);
     const now = Date.now();
-    
+
     if (cached && now - cached.timestamp < cached.ttl) {
       return cached.data as T;
     }
-    
+
     const data = producer();
     developmentStorage._cache.set(key, { data, timestamp: now, ttl: ttlMs });
     return data;
   }
-  
+
   async getAllData() {
     const startTime = Date.now();
-    
+
     const result = this.getCachedData('getAllData', () => ({
       settings: developmentStorage.settings,
       budget: developmentStorage.budget,
       holdings: [...developmentStorage.holdings], // シャローコピーでメモリ効率化
       usageStats: [...developmentStorage.usageStats]
     }), 5000); // 5秒キャッシュ
-    
+
     console.log(`MockDatabaseService.getAllData completed in ${Date.now() - startTime}ms`);
     return result;
   }
@@ -180,10 +181,10 @@ class MockDatabaseService {
       ...budgetData
     };
     developmentStorage.budget = updated;
-    
+
     // キャッシュをクリアして一貫性を保つ
     developmentStorage._cache.delete('getAllData');
-    
+
     return updated;
   }
 
@@ -212,24 +213,24 @@ class MockDatabaseService {
       ...holding,
       updatedAt: now
     };
-    
+
     const existingIndex = developmentStorage.holdings.findIndex(h => h.id === holding.id);
     if (existingIndex >= 0) {
       developmentStorage.holdings[existingIndex] = updatedHolding;
     } else {
       developmentStorage.holdings.push(updatedHolding);
     }
-    
+
     // キャッシュをクリア
     developmentStorage._cache.delete('getAllData');
-    
+
     return updatedHolding;
   }
 
   async upsertFormationUsage(formationId: string): Promise<FormationUsageType> {
     const now = new Date().toISOString();
     const existingIndex = developmentStorage.usageStats.findIndex(u => u.formationId === formationId);
-    
+
     if (existingIndex >= 0) {
       const existing = developmentStorage.usageStats[existingIndex];
       const updated: FormationUsageType = {
@@ -273,7 +274,7 @@ export default async function handler(
       // Phase 2-1: GET /api/data 完全実装
       try {
         const data = await dbService.getAllData();
-        
+
         const response: ApiDataResponse = {
           success: true,
           timestamp: new Date().toISOString(),
@@ -294,29 +295,35 @@ export default async function handler(
               createdAt: new Date().toISOString(),
               updatedAt: new Date().toISOString()
             },
-            formations: FORMATIONS,
+            formations: FORMATION_DEFINITIONS.map(f => ({
+              id: f.id,
+              name: f.name,
+              tiers: f.tiers,
+              targetPercentages: f.percentages,
+              description: f.name
+            })),
             usageStats: data.usageStats || []
           }
         };
 
         const processingTime = Date.now() - startTime;
         console.log(`[${requestId}] GET /api/data completed in ${processingTime}ms`);
-        
+
         // パフォーマンスメトリクスをレスポンスヘッダーに追加
         if (process.env.NODE_ENV === 'development') {
           res.setHeader('X-Response-Time', `${processingTime}ms`);
           res.setHeader('X-Data-Size', JSON.stringify(response).length.toString());
         }
-        
+
         res.status(200).json(response);
 
       } catch (dbError) {
         throw new DatabaseError('Failed to retrieve data from database', dbError as Error);
       }
-      
+
     } else if (req.method === 'POST') {
       // Phase 2-1: POST /api/data 完全実装（バリデーション強化）
-      
+
       // リクエスト検証
       const validation = validateApiDataRequest(req.body);
       if (!validation.valid) {
@@ -331,7 +338,7 @@ export default async function handler(
       }
 
       const requestData = req.body as ApiDataRequest;
-      
+
       try {
         let updatedBudget: BudgetType | null = null;
         let updatedSettings: SettingsType | null = null;
@@ -354,12 +361,12 @@ export default async function handler(
           const settingsUpdate: Partial<SettingsType> = {
             ...requestData.settings
           };
-          
+
           if (requestData.formationId) {
             settingsUpdate.currentFormationId = requestData.formationId;
             settingsUpdate.lastCheckDate = new Date().toISOString();
           }
-          
+
           updatePromises.push(
             dbService.upsertSettings(settingsUpdate).then(result => {
               updatedSettings = result;
@@ -380,11 +387,11 @@ export default async function handler(
         // 保有銘柄更新（フルリプレース）
         if (requestData.holdings && Array.isArray(requestData.holdings) && requestData.holdings.length > 0) {
           await dbService.clearAllHoldings();
-          
-          const holdingPromises = requestData.holdings.map(holding => 
+
+          const holdingPromises = requestData.holdings.map(holding =>
             dbService.upsertHolding(holding)
           );
-          
+
           const results = await Promise.all(holdingPromises);
           updatedHoldings.push(...results);
         }
@@ -412,27 +419,33 @@ export default async function handler(
               createdAt: new Date().toISOString(),
               updatedAt: new Date().toISOString()
             },
-            formations: FORMATIONS,
+            formations: FORMATION_DEFINITIONS.map(f => ({
+              id: f.id,
+              name: f.name,
+              tiers: f.tiers,
+              targetPercentages: f.percentages,
+              description: f.name
+            })),
             usageStats: finalData.usageStats || []
           }
         };
 
         const processingTime = Date.now() - startTime;
         console.log(`[${requestId}] POST /api/data completed in ${processingTime}ms`);
-        
+
         // パフォーマンスメトリクスをレスポンスヘッダーに追加
         if (process.env.NODE_ENV === 'development') {
           res.setHeader('X-Response-Time', `${processingTime}ms`);
           res.setHeader('X-Data-Size', JSON.stringify(response).length.toString());
           res.setHeader('X-DB-Operations', updatedHoldings.length.toString());
         }
-        
+
         res.status(200).json(response);
 
       } catch (dbError) {
         throw new DatabaseError('Failed to save data to database', dbError as Error);
       }
-      
+
     } else {
       // サポートされていないHTTPメソッド
       res.status(405).json({
@@ -444,11 +457,11 @@ export default async function handler(
         }
       });
     }
-    
+
   } catch (error) {
     // Phase 2-1: 強化されたエラーハンドリング
     console.error(`[${requestId}] API Error:`, error);
-    
+
     let errorCode: ApiErrorCode = API_ERROR_CODES.INTERNAL_ERROR;
     let errorMessage = '内部サーバーエラーが発生しました';
     let statusCode = 500;
@@ -462,7 +475,7 @@ export default async function handler(
     if (process.env.NODE_ENV === 'development') {
       errorMessage = `開発環境エラー: ${error instanceof Error ? error.message : '不明なエラー'}`;
     }
-    
+
     res.status(statusCode).json({
       success: false,
       timestamp: new Date().toISOString(),
@@ -486,11 +499,11 @@ export default async function handler(
 
 export async function onRequestGet(context: any) {
   const { request, env } = context;
-  
+
   try {
     // Cloudflare環境をグローバルに設定（DatabaseService統合）
     (global as any).__env__ = env;
-    
+
     const url = new URL(request.url);
     const mockReq = {
       method: 'GET',
@@ -512,7 +525,7 @@ export async function onRequestGet(context: any) {
           statusCode = code;
           return new Response(JSON.stringify(data), {
             status: code,
-            headers: { 
+            headers: {
               'Content-Type': 'application/json',
               'Access-Control-Allow-Origin': '*',
               'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
@@ -524,10 +537,10 @@ export async function onRequestGet(context: any) {
     } as any;
 
     await handler(mockReq as any, mockRes);
-    
+
     return new Response(JSON.stringify(responseData!), {
       status: statusCode,
-      headers: { 
+      headers: {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*'
       }
@@ -551,11 +564,11 @@ export async function onRequestGet(context: any) {
 
 export async function onRequestPost(context: any) {
   const { request, env } = context;
-  
+
   try {
     // Cloudflare環境をグローバルに設定（DatabaseService統合）
     (global as any).__env__ = env;
-    
+
     let body;
     try {
       body = await request.json();
@@ -572,7 +585,7 @@ export async function onRequestPost(context: any) {
         headers: { 'Content-Type': 'application/json' }
       });
     }
-    
+
     const url = new URL(request.url);
     const mockReq = {
       method: 'POST',
@@ -594,7 +607,7 @@ export async function onRequestPost(context: any) {
           statusCode = code;
           return new Response(JSON.stringify(data), {
             status: code,
-            headers: { 
+            headers: {
               'Content-Type': 'application/json',
               'Access-Control-Allow-Origin': '*',
               'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
@@ -606,10 +619,10 @@ export async function onRequestPost(context: any) {
     } as any;
 
     await handler(mockReq as any, mockRes);
-    
+
     return new Response(JSON.stringify(responseData!), {
       status: statusCode,
-      headers: { 
+      headers: {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*'
       }

@@ -2,11 +2,12 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createDatabaseService, handleDatabaseError } from '../../src/lib/utils/database';
 import { sendErrorResponse } from '../../src/lib/utils/api-error-handler';
-import { FORMATIONS, API_ERROR_CODES } from '../../src/lib/utils/types';
-import type { 
-  ApiCronResponse, 
+import { FORMATION_DEFINITIONS } from '../../src/lib/constants/types';
+import { API_ERROR_CODES } from '../../src/lib/utils/types';
+import type {
+  ApiCronResponse,
   CloudflareEnv,
-  FormationUsageType 
+  FormationUsageType
 } from '../../src/lib/utils/types';
 
 // 開発環境用のメモリ内ストレージ（data.tsと同じデータを共有）
@@ -20,7 +21,7 @@ function getCloudflareEnv(): CloudflareEnv | null {
   if (process.env.NODE_ENV === 'development') {
     return null; // 開発環境では null を返す
   }
-  
+
   return (global as any).__env__ as CloudflareEnv;
 }
 
@@ -69,7 +70,7 @@ async function checkFormationChange(dbService: any): Promise<{
   // MockCronServiceの場合は既存のロジックを使用
   if (dbService instanceof MockCronService) {
     const settings = await dbService.getSettings();
-    
+
     if (!settings) {
       return {
         hasChanged: false,
@@ -116,7 +117,7 @@ async function checkFormationChange(dbService: any): Promise<{
 
 // フォーメーション使用統計を更新する関数
 async function updateFormationUsageStats(
-  dbService: any, 
+  dbService: any,
   currentFormationId: string,
   hasChanged: boolean
 ): Promise<FormationUsageType[]> {
@@ -181,7 +182,7 @@ export default async function handler(
 
     // フォーメーション使用統計を更新
     const updatedStats = await updateFormationUsageStats(
-      dbService, 
+      dbService,
       changeCheck.currentFormationId,
       changeCheck.hasChanged
     );
@@ -216,26 +217,26 @@ export default async function handler(
 // wrangler.toml で設定される cron トリガーから呼び出される
 export async function scheduled(event: any, env: CloudflareEnv, ctx: any) {
   console.log('Cron trigger executed at:', new Date().toISOString());
-  
+
   try {
     // Cloudflare 環境を global に設定
     (global as any).__env__ = env;
-    
+
     const dbService = createDatabaseService(env);
-    
+
     // 自動チェック処理を実行
     const changeCheck = await checkFormationChange(dbService);
-    
+
     if (changeCheck.hasChanged) {
       await updateFormationUsageStats(dbService, changeCheck.currentFormationId, changeCheck.hasChanged);
-      
+
       console.log(`Formation usage updated for: ${changeCheck.currentFormationId}`);
     } else {
       console.log('No formation changes detected');
     }
-    
+
     return new Response('Cron job completed successfully', { status: 200 });
-    
+
   } catch (error) {
     console.error('Scheduled cron job error:', error);
     return new Response(`Cron job failed: ${error}`, { status: 500 });
@@ -245,12 +246,12 @@ export async function scheduled(event: any, env: CloudflareEnv, ctx: any) {
 // Cloudflare Pages Functions用のエクスポート
 export async function onRequestPost(context: any) {
   const { request, env } = context;
-  
+
   // Cloudflare 環境を global に設定
   (global as any).__env__ = env;
-  
+
   const url = new URL(request.url);
-  
+
   const mockReq = {
     method: 'POST',
     url: url.pathname,
@@ -278,11 +279,11 @@ export function createManualCronTrigger() {
         scheduledTime: Date.now(),
         cron: '0 5 * * *' // 毎日AM5:00
       };
-      
+
       const mockCtx = {
         waitUntil: (promise: Promise<any>) => promise
       };
-      
+
       return scheduled(mockEvent, env, mockCtx);
     }
   };

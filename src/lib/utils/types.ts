@@ -2,10 +2,10 @@
 // Agent 1とAgent 2で共有する型定義
 // Drizzle ORM スキーマと完全に整合性を保つ
 
-import type { 
-  Settings as DbSettings, 
-  Holdings as DbHoldings, 
-  Budget as DbBudget, 
+import type {
+  Settings as DbSettings,
+  Holdings as DbHoldings,
+  Budget as DbBudget,
   FormationUsage as DbFormationUsage,
   FormationHistory as DbFormationHistory
 } from './schema';
@@ -132,11 +132,11 @@ export interface AppStore {
   holdings: HoldingType[];
   budget: BudgetType | null;
   usageStats: FormationUsageType[];
-  
+
   // UI状態
   isLoading: boolean;
   error: string | null;
-  
+
   // アクション
   setFormation: (formation: FormationType) => void;
   updateHolding: (holding: HoldingType) => void;
@@ -195,49 +195,24 @@ export interface D1RunResult {
 export interface CloudflareEnv {
   DB: D1Database;
   ENVIRONMENT: 'development' | 'preview' | 'production';
-  
+
   // Cloudflare Workers 標準環境変数
   CF_PAGES?: string;
   CF_PAGES_COMMIT_SHA?: string;
   CF_PAGES_BRANCH?: string;
   CF_PAGES_URL?: string;
-  
+
   // アプリ固有の環境変数
   API_VERSION?: string;
   DEBUG_MODE?: string;
 }
 
 // ティッカー定数型 - Agent 1のSATELLITE_TICKERSと統合
-export type TickerSymbol = 
-  | 'AMZN' | 'AVGO' | 'COIN' | 'CRM' | 'CRWD' | 'GOOGL' 
+export type TickerSymbol =
+  | 'AMZN' | 'AVGO' | 'COIN' | 'CRM' | 'CRWD' | 'GOOGL'
   | 'META' | 'MSFT' | 'NFLX' | 'NVDA' | 'ORCL' | 'PLTR'
   | 'PYPL' | 'SHOP' | 'SNOW' | 'SQ' | 'TSLA' | 'UBER'
   | 'V' | 'WDAY' | 'ZM';
-
-// フォーメーション定義定数
-export const FORMATIONS: FormationType[] = [
-  {
-    id: 'formation-3-50-30-20',
-    name: '3銘柄 50-30-20%型',
-    tiers: 3,
-    targetPercentages: [50, 30, 20],
-    description: '主力1銘柄50%、サポート2銘柄で30%・20%の配分'
-  },
-  {
-    id: 'formation-4-40-30-20-10',
-    name: '4銘柄 40-30-20-10%型',
-    tiers: 4,
-    targetPercentages: [40, 30, 20, 10],
-    description: 'バランス型：40%・30%・20%・10%の段階的配分'
-  },
-  {
-    id: 'formation-5-30-25-20-15-10',
-    name: '5銘柄 30-25-20-15-10%型',
-    tiers: 5,
-    targetPercentages: [30, 25, 20, 15, 10],
-    description: '分散型：30%から10%まで5段階の配分'
-  }
-];
 
 // デフォルト値定数
 export const DEFAULT_BUDGET: Omit<BudgetType, 'id'> = {
@@ -280,7 +255,7 @@ export type IsBudgetType = (obj: unknown) => obj is BudgetType;
 export type IsSettingsType = (obj: unknown) => obj is SettingsType;
 export type IsApiDataRequest = (obj: unknown) => obj is ApiDataRequest;
 
-// 型変換関数型  
+// 型変換関数型
 export type HoldingToDbHolding = (holding: HoldingType) => DbHoldings;
 export type DbHoldingToHolding = (dbHolding: DbHoldings) => HoldingType;
 export type SettingsToDbSettings = (settings: SettingsType) => DbSettings;

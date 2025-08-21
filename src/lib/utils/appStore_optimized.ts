@@ -15,7 +15,7 @@ import type {
   StockHoldingType,
   AppStateType
 } from '../constants/types';
-import { FORMATION_DEFINITIONS } from '../constants/formations';
+import { FORMATION_DEFINITIONS } from '../constants/types';
 import {
   saveAllData,
   saveFormation,
